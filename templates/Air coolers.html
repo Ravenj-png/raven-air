@@ -1,0 +1,1604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <title>Air System Coolers Limited | Mechanical & Electrical Systems</title>
+  <meta name="description" content="Air System Coolers Limited: 25+ Years Experience. Industrial & Domestic HVAC, Fire Fighting, and Electrical Systems in Kampala, Uganda. ISO 9001, NFPA, ASHRAE Certified.">
+  
+  <link rel="preconnect" href="https://images.unsplash.com">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  
+  <!-- Google reCAPTCHA v3 -->
+  <script src="https://www.google.com/recaptcha/api.js?render=YOUR_RECAPTCHA_SITE_KEY_HERE"></script>
+  
+  <style>
+    :root {
+      --accent: #dc2626;
+      --accent-dark: #b91c1c;
+      --accent-light: #fee2e2;
+      --primary-dark: #111827;
+      --card-bg: rgba(255, 255, 255, 0.98);
+      --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.05);
+      --shadow-hover: 0 12px 24px rgba(220, 38, 38, 0.15);
+      --text-color: #2c3e50;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; font-size: 16px; -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+      background: #f8fafc;
+      color: var(--text-color);
+      width: 100%;
+    }
+
+    .bg-slider {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      z-index: -3; overflow: hidden; background: #000;
+    }
+    .bg-slide {
+      position: absolute; width: 100%; height: 100%;
+      background-size: cover; background-position: center;
+      background-repeat: no-repeat;
+      opacity: 0; transition: opacity 1.5s ease-in-out;
+      will-change: opacity;
+    }    .bg-slide.active { opacity: 1; z-index: 2; }
+    .bg-slide:not(.active) { opacity: 0; z-index: 1; }
+    
+    .bg-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(135deg, rgba(17, 24, 39, 0.75) 0%, rgba(220, 38, 38, 0.25) 100%);
+      z-index: -1; pointer-events: none;
+    }
+
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #f1f1f1; }
+    ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 8px; }
+
+    .urgency-banner {
+      position: fixed; top: 0; left: 0; width: 100%; height: 40px;
+      z-index: 1002; display: flex; align-items: center; justify-content: center;
+      background: var(--primary-dark);
+      color: white; font-size: clamp(0.7rem, 2vw, 0.85rem); font-weight: 600;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      padding: 0 clamp(0.5rem, 2vw, 1rem);
+      border-bottom: 3px solid var(--accent);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .urgency-banner span { color: var(--accent); margin-right: 8px; }
+    .urgency-banner a { color: white; text-decoration: underline; margin-left: 8px; }
+
+    nav {
+      position: fixed; top: 40px; left: 0; width: 100%;
+      padding: clamp(0.6rem, 2vw, 0.8rem) clamp(1rem, 3vw, 2rem); display: flex; justify-content: space-between; align-items: center;
+      background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(12px);
+      z-index: 1001; border-bottom: 2px solid var(--accent);
+      transition: all 0.3s ease;
+    }
+    nav.scrolled { box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1); padding-top: 0.6rem; padding-bottom: 0.6rem; }
+    .logo { font-size: clamp(1rem, 3vw, 1.2rem); font-weight: 800; letter-spacing: -0.5px; color: var(--primary-dark); text-transform: uppercase; }
+    .logo span { color: var(--accent); }
+    .nav-links { display: flex; gap: clamp(0.8rem, 2vw, 1.2rem); flex-wrap: nowrap; }
+    .nav-links button {
+      background: none; border: none; font-size: clamp(0.7rem, 2vw, 0.85rem); font-weight: 600;
+      color: #4b5563; cursor: pointer; transition: 0.2s; font-family: inherit;
+      padding-bottom: 6px; position: relative;
+    }
+    .nav-links button::after {
+      content: ''; position: absolute; bottom: 0; left: 50%;
+      width: 0; height: 2px; background: var(--accent);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); transform: translateX(-50%);
+    }
+    .nav-links button:hover { color: var(--accent); }
+    .nav-links button:hover::after, .nav-links button.active-page-btn::after { width: 100%; }
+    .nav-links button.active-page-btn { color: var(--accent); }
+    
+    @media (max-width: 800px) {
+      nav { padding: clamp(0.6rem, 2vw, 1rem); flex-direction: column; gap: 0.5rem; top: 40px; }
+      .logo { font-size: 1rem; }
+      .nav-links { gap: 0.6rem; justify-content: center; flex-wrap: wrap; width: 100%; }
+      .nav-links button { font-size: 0.75rem; padding: 5px; }
+    }
+
+    .page { 
+      display: none; 
+      animation: fadeIn 0.4s ease; 
+      position: relative; 
+      z-index: 10; 
+      padding-top: 110px;
+      min-height: 100vh;
+      width: 100%;
+      overflow-x: hidden;
+    }
+    .page.active-page { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .weather-section {
+      background: linear-gradient(135deg, #f8fafc 0%, #e0f2fe 100%);
+      border-bottom: 4px solid var(--accent);
+      padding: clamp(2rem, 5vw, 3rem) clamp(1rem, 3vw, 1rem);
+      margin: 0;
+      width: 100%;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    .weather-header { text-align: center; margin-bottom: clamp(1.5rem, 4vw, 2.5rem); }
+    .weather-header h2 { color: var(--primary-dark); font-size: clamp(1.5rem, 4vw, 2rem); margin-bottom: 0.5rem; font-weight: 800; }
+    .weather-header p { color: #64748b; font-size: clamp(0.9rem, 2vw, 1rem); }
+    .weather-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(1.5rem, 4vw, 2.5rem);
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    #map {
+      height: clamp(300px, 50vh, 450px);
+      border-radius: 16px;
+      border: 3px solid white;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      width: 100%;
+    }
+    .weather-cards { display: flex; flex-direction: column; gap: clamp(0.8rem, 2vw, 1.2rem); }
+    .weather-card {
+      background: white;
+      padding: clamp(1rem, 3vw, 1.8rem);
+      border-radius: 12px;      border-left: 5px solid var(--accent);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      transition: transform 0.3s ease;
+    }
+    .weather-card:hover {
+      transform: translateX(8px);
+      box-shadow: 0 6px 20px rgba(220, 38, 38, 0.15);
+    }
+    .weather-card h4 { color: var(--primary-dark); margin-bottom: 0.5rem; font-size: clamp(1rem, 2.5vw, 1.2rem); font-weight: 700; }
+    .weather-card p { color: #64748b; font-size: clamp(0.85rem, 2vw, 0.95rem); }
+    .weather-temp { font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 800; color: var(--accent); text-align: right; }
+    .weather-location-hint { text-align: center; margin-top: clamp(1rem, 3vw, 2rem); color: #64748b; font-size: clamp(0.8rem, 2vw, 0.9rem); font-style: italic; }
+
+    .hero {
+      min-height: 85vh; display: flex; align-items: center; justify-content: center;
+      text-align: center; padding: clamp(2rem, 5vw, 3rem) clamp(1rem, 3vw, 1.5rem);
+      width: 100%;
+    }
+    .hero-text {
+      max-width: 800px; 
+      background: rgba(255, 255, 255, 0.98); 
+      backdrop-filter: blur(10px);
+      padding: clamp(1.5rem, 4vw, 2rem) clamp(1rem, 3vw, 1.5rem); 
+      border-radius: 12px; 
+      border-left: 8px solid var(--accent);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3); 
+      width: 100%;
+    }
+    .hero-text h1 { font-size: clamp(1.5rem, 5vw, 2.5rem); font-weight: 800; color: var(--primary-dark); margin-bottom: 0.8rem; line-height: 1.1; }
+    .hero-text p { font-size: clamp(0.9rem, 2.5vw, 1rem); color: #374151; margin-bottom: 1.5rem; max-width: 600px; margin-left: auto; margin-right: auto; font-weight: 500; }
+    .btn-group { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: clamp(10px, 2.5vw, 12px) clamp(20px, 4vw, 28px); border: none; font-weight: 700;
+      border-radius: 6px; cursor: pointer; transition: 0.25s; font-size: clamp(0.85rem, 2.5vw, 0.9rem);
+      text-decoration: none;
+    }
+    .btn-primary { background: var(--accent); color: white; box-shadow: 0 4px 14px rgba(220,38,38,0.4); }
+    .btn-primary:hover { background: var(--accent-dark); transform: translateY(-2px); }
+    .btn-whatsapp { background: #25D366; color: white; box-shadow: 0 4px 14px rgba(37,211,102,0.4); }
+    .btn-whatsapp:hover { background: #128C7E; transform: translateY(-2px); }
+
+    .trust-section {
+      padding: clamp(1rem, 3vw, 1.5rem) clamp(1rem, 3vw, 1rem); 
+      max-width: 100%; 
+      margin: -2rem auto 2rem;
+      background: white;       border-radius: 12px; 
+      position: relative; 
+      z-index: 10;
+      box-shadow: var(--shadow-sm); 
+      border-top: 4px solid var(--accent);
+      width: 95%; /* Slight margin on sides for mobile aesthetics */
+    }
+    .trust-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; }
+    .trust-item { text-align: center; padding: 0.8rem; border-right: 1px solid #eee; }
+    .trust-item:last-child { border-right: none; }
+    .trust-item h3 { font-size: clamp(1.5rem, 4vw, 1.8rem); font-weight: 800; color: var(--accent); margin-bottom: 0.2rem; }
+    .trust-item p { font-size: clamp(0.7rem, 2vw, 0.8rem); color: #374151; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .certifications-section {
+      padding: clamp(1.5rem, 4vw, 2rem) clamp(1rem, 3vw, 1rem);
+      text-align: center;
+      background: white;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      margin: 2rem auto;
+      max-width: 100%;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      width: 95%;
+    }
+    .cert-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: clamp(1rem, 3vw, 1.5rem); margin-top: 1.5rem; }
+    .cert-item { display: flex; flex-direction: column; align-items: center; gap: 0.8rem; }
+    .cert-badge {
+      width: clamp(100px, 20vw, 120px); height: clamp(100px, 20vw, 120px);
+      background: white; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+      border: 2px solid var(--accent);
+      transition: transform 0.3s;
+      padding: 0.8rem;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .cert-badge:hover { transform: translateY(-5px); box-shadow: 0 6px 16px rgba(220,38,38,0.2); }
+    .cert-badge img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    .cert-name { font-size: clamp(0.8rem, 2.5vw, 0.9rem); font-weight: 700; color: var(--primary-dark); text-align: center; max-width: 140px; }
+
+    section { padding: clamp(1.5rem, 4vw, 2rem) clamp(1rem, 3vw, 1rem); max-width: 1200px; margin: 0 auto; width: 100%; }
+    .section-header { text-align: center; margin-bottom: 2rem; background: white; padding: clamp(1rem, 3vw, 1.5rem); border-radius: 12px; border: 2px solid #e5e7eb; box-shadow: var(--shadow-sm); }
+    .section-header h2 { font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 800; color: var(--primary-dark); margin-bottom: 0.5rem; }
+    .section-header p { color: #4b5563; font-size: clamp(0.9rem, 2.5vw, 1rem); max-width: 600px; margin: 0 auto; font-weight: 500; }
+    .section-header .line { width: 60px; height: 4px; background: var(--accent); margin: 1rem auto 0; border-radius: 2px; }
+
+    .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: clamp(1rem, 3vw, 1.5rem); }
+    .card {
+      background: white; border-radius: 12px; overflow: hidden;      transition: all 0.3s ease; border: 2px solid #e5e7eb;
+      box-shadow: var(--shadow-sm); position: relative; cursor: pointer;
+    }
+    .card:hover { transform: translateY(-6px); border-color: var(--accent); box-shadow: var(--shadow-hover); }
+    .card-img-wrapper { height: clamp(150px, 30vw, 180px); overflow: hidden; position: relative; }
+    .card-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+    .card:hover .card-img { transform: scale(1.05); }
+    .card-category {
+      position: absolute; top: 0.8rem; left: 0.8rem;
+      background: var(--accent); color: white;
+      padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 700;
+    }
+    .card-body { padding: clamp(1rem, 3vw, 1.2rem); }
+    .card h3 { font-size: clamp(1.1rem, 3vw, 1.2rem); font-weight: 700; color: var(--primary-dark); margin-bottom: 0.5rem; }
+    .card p { font-size: clamp(0.8rem, 2.5vw, 0.85rem); color: #4b5563; margin-bottom: 1rem; font-weight: 500; }
+    .card-badges { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem; }
+    .badge { font-size: 0.65rem; font-weight: 600; padding: 3px 8px; border-radius: 4px; background: #f3f4f6; color: #1f2937; border: 1px solid #d1d5db; }
+    .badge.red { background: var(--accent-light); color: var(--accent-dark); border-color: var(--accent); }
+
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: clamp(1rem, 3vw, 1.2rem); }
+    .feature-box {
+      background: white; padding: clamp(1.5rem, 4vw, 2rem); border-radius: 12px;
+      border-top: 4px solid var(--accent); box-shadow: var(--shadow-sm); border: 2px solid #e5e7eb;
+      text-align: center;
+    }
+    .feature-box img {
+      width: 80px; height: 80px; object-fit: cover; border-radius: 50%; margin-bottom: 1rem;
+      border: 3px solid var(--accent-light);
+    }
+    .feature-box h3 { font-size: clamp(1rem, 2.5vw, 1.1rem); margin-bottom: 0.6rem; color: var(--primary-dark); font-weight: 700; }
+    .feature-box p { font-size: clamp(0.8rem, 2.5vw, 0.85rem); color: #4b5563; font-weight: 500; }
+
+    .partners-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: clamp(1.5rem, 4vw, 2rem);
+      margin-top: 2rem;
+    }
+    .partner-card {
+      background: white; border-radius: 12px; padding: clamp(1.5rem, 4vw, 2rem);
+      border: 2px solid #e5e7eb; box-shadow: var(--shadow-sm);
+      transition: all 0.3s ease; text-align: center;
+    }
+    .partner-card:hover { transform: translateY(-5px); border-color: var(--accent); box-shadow: var(--shadow-hover); }
+    .partner-logo {
+      width: 100%; height: clamp(100px, 25vw, 120px);
+      object-fit: contain; margin-bottom: 1rem;
+      border-radius: 8px; background: #f9fafb; padding: 1rem;
+    }
+    .partner-card h3 { color: var(--primary-dark); font-size: clamp(1.1rem, 3vw, 1.3rem); margin-bottom: 0.8rem; font-weight: 700; }    .partner-card p { color: #6b7280; font-size: clamp(0.85rem, 2.5vw, 0.9rem); line-height: 1.6; }
+    .partner-sector {
+      display: inline-block; background: var(--accent-light);
+      color: var(--accent-dark); padding: 4px 12px; border-radius: 20px;
+      font-size: 0.75rem; font-weight: 600; margin-top: 1rem; border: 1px solid var(--accent);
+    }
+
+    .project-card { display: flex; flex-direction: column; }
+    .project-card .card-body { flex: 1; }
+    .project-stats { display: flex; gap: 1rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e5e7eb; }
+    .stat { flex: 1; }
+    .stat span { display: block; font-size: 0.7rem; color: #6b7280; text-transform: uppercase; font-weight: 600; }
+    .stat strong { display: block; font-size: 0.85rem; color: var(--primary-dark); font-weight: 700; }
+
+    .cta-section {
+      background: white; color: var(--primary-dark); text-align: center;
+      padding: clamp(2rem, 5vw, 3rem) clamp(1rem, 3vw, 1rem); margin-top: 2rem;
+      border: 2px solid var(--accent); border-radius: 12px;
+      box-shadow: var(--shadow-sm); width: 100%;
+    }
+    .cta-section h2 { font-size: clamp(1.5rem, 4vw, 1.8rem); margin-bottom: 0.8rem; color: var(--primary-dark); }
+    .cta-section p { font-size: clamp(0.9rem, 2.5vw, 1rem); margin-bottom: 1.5rem; color: #4b5563; font-weight: 500; }
+    .cta-section .btn { background: var(--accent); color: white; }
+    .cta-section .btn:hover { background: var(--accent-dark); transform: translateY(-2px); }
+
+    .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(1.5rem, 4vw, 2rem); }
+    .contact-card { background: white; padding: clamp(1rem, 3vw, 1.5rem); border-radius: 12px; box-shadow: var(--shadow-sm); border: 2px solid #e5e7eb; }
+    .contact-info { padding: 1rem 0; }
+    .info-item { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1.5rem; }
+    .info-icon { font-size: 1.5rem; color: var(--accent); }
+    input, textarea {
+      width: 100%; padding: 10px; border: 2px solid #d1d5db; border-radius: 8px;
+      margin-bottom: 0.8rem; font-family: inherit; transition: border-color 0.2s; font-size: 0.9rem;
+    }
+    input:focus, textarea:focus { outline: none; border-color: var(--accent); }
+    
+    footer {
+      background: #111827; color: #d1d5db; padding: clamp(2rem, 5vw, 3rem) clamp(1rem, 3vw, 1rem) clamp(1.5rem, 4vw, 2rem);
+      font-size: 0.85rem; width: 100%;
+    }
+    .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 2rem; max-width: 1200px; margin: 0 auto 2rem; }
+    .footer-col h4 { color: white; margin-bottom: 0.8rem; font-size: 1rem; }
+    .footer-col a { color: #d1d5db; text-decoration: none; display: block; margin-bottom: 0.4rem; transition: color 0.2s; }
+    .footer-col a:hover { color: var(--accent); }
+    .copyright { text-align: center; padding-top: 1.5rem; border-top: 1px solid #374151; font-size: 0.75rem; }
+
+    .modal {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+      justify-content: center; align-items: center; z-index: 2000;    }
+    .modal-card {
+      background: white; max-width: 600px; width: 90%;
+      border-radius: 16px; overflow: hidden; border-top: 6px solid var(--accent);
+      max-height: 90vh; overflow-y: auto;
+    }
+    .modal-img { width: 100%; height: 250px; object-fit: cover; }
+    .modal-content { padding: 1.5rem; }
+    .modal-close { float: right; font-size: 1.5rem; cursor: pointer; color: #6b7280; font-weight: bold; }
+
+    .whatsapp-float {
+      position: fixed; bottom: 20px; right: 20px; background: #25D366;
+      width: 56px; height: 56px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      text-decoration: none; z-index: 999;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: transform 0.3s;
+    }
+    .whatsapp-float:hover { transform: scale(1.1); }
+    .whatsapp-float img { width: 30px; height: 30px; }
+
+    .chatbot-widget {
+      position: fixed;
+      bottom: 90px;
+      right: 20px;
+      z-index: 998;
+    }
+    .chatbot-toggle {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+      color: white;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      transition: transform 0.3s;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    .chatbot-toggle:hover { transform: scale(1.1); animation: none; }
+    .chatbot-window {
+      position: fixed;
+      top: 0;      left: 0;
+      width: 100%;
+      height: 100%;
+      background: white;
+      z-index: 10000;
+      display: none;
+      flex-direction: column;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    }
+    /* Mobile Chatbot Full Screen */
+    @media (max-width: 600px) {
+      .chatbot-window {
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
+      }
+    }
+    .chatbot-window.active { display: flex; }
+    .chatbot-header {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+      color: white;
+      padding: 1.2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .chatbot-header h3 { font-size: 1.2rem; font-weight: 700; }
+    .chatbot-controls { display: flex; gap: 10px; }
+    .chatbot-minimize, .chatbot-close {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+    }
+    .chatbot-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.2rem;
+      background: #f8fafc;
+    }
+    .chat-message {
+      margin-bottom: 1.2rem;
+      padding: 1rem;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      max-width: 85%;
+      line-height: 1.5;
+      animation: slideIn 0.3s ease;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .chat-message.bot { background: white; border: 2px solid #e5e7eb; align-self: flex-start; border-bottom-left-radius: 4px; }
+    .chat-message.user {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+      color: white;      align-self: flex-end;
+      margin-left: auto;
+      border-bottom-right-radius: 4px;
+    }
+    .chatbot-input {
+      display: flex;
+      padding: 1.2rem;
+      border-top: 2px solid #e5e7eb;
+      background: white;
+      padding-bottom: calc(1.2rem + env(safe-area-inset-bottom));
+    }
+    .chatbot-input input {
+      flex: 1;
+      margin: 0;
+      border-radius: 8px 0 0 8px;
+      border: 2px solid #e5e7eb;
+      padding: 0.8rem;
+      font-size: 1rem;
+    }
+    .chatbot-input button {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 0 1.8rem;
+      border-radius: 0 8px 8px 0;
+      cursor: pointer;
+      font-weight: 700;
+      transition: background 0.3s;
+    }
+    .chatbot-input button:hover { background: var(--accent-dark); }
+
+    .btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+    .btn-loading {
+      position: relative;
+      pointer-events: none;
+    }
+    .btn-loading::after {
+      content: "";
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-left: 8px;
+    }    @keyframes spin { to { transform: rotate(360deg); } }
+    
+    .form-message {
+      padding: 1rem;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      display: none;
+    }
+    .form-message.success {
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #86efac;
+      display: block;
+    }
+    .form-message.error {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fca5a5;
+      display: block;
+    }
+
+    @media (max-width: 768px) {
+      .contact-grid { grid-template-columns: 1fr; }
+      .hero-text h1 { font-size: 1.6rem; }
+      .trust-grid { grid-template-columns: repeat(2, 1fr); }
+      .trust-item:nth-child(2) { border-right: none; }
+      .weather-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 480px) {
+      .urgency-banner { font-size: 0.75rem; height: auto; padding: 0.5rem; white-space: normal; text-align: center;}
+      nav { top: 0; }
+      .page { padding-top: 150px; }
+      .btn { padding: 10px 20px; font-size: 0.85rem; }
+      .partners-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg-slider">
+  <div class="bg-slide active" style="background-image: url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=2560&q=90');"></div>
+  <div class="bg-slide" style="background-image: url('https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=2560&q=90');"></div>
+  <div class="bg-slide" style="background-image: url('https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=2560&q=90');"></div>
+</div>
+<div class="bg-overlay"></div>
+
+<div class="urgency-banner">
+  <span>⚡ 24/7 Emergency Support</span> | Need HVAC or Fire Systems? <a href="tel:+256741333544">Call Now</a>
+</div>
+<nav id="navbar">
+  <div class="logo">AIR SYSTEM <span>COOLERS LTD</span></div>
+  <div class="nav-links">
+    <button class="nav-btn" data-page="home">HOME</button>
+    <button class="nav-btn" data-page="about">ABOUT</button>
+    <button class="nav-btn" data-page="services">SERVICES</button>
+    <button class="nav-btn" data-page="projects">PROJECTS</button>
+    <button class="nav-btn" data-page="contact">CONTACT</button>
+  </div>
+</nav>
+
+<!-- HOME PAGE -->
+<div id="homePage" class="page active-page">
+  <section class="weather-section">
+    <div class="weather-header">
+      <h2>🌍 Live Weather & Location Map</h2>
+      <p>Real-time weather conditions across Uganda</p>
+    </div>
+    <div class="weather-grid">
+      <div id="map"></div>
+      <div class="weather-cards" id="weatherCards">
+        <div class="weather-card"><div><h4>Kampala</h4><p>Loading weather data...</p></div><div class="weather-temp">--°C</div></div>
+        <div class="weather-card"><div><h4>Jinja</h4><p>Loading weather data...</p></div><div class="weather-temp">--°C</div></div>
+        <div class="weather-card"><div><h4>Gulu</h4><p>Loading weather data...</p></div><div class="weather-temp">--°C</div></div>
+        <div class="weather-card"><div><h4>Mbarara</h4><p>Loading weather data...</p></div><div class="weather-temp">--°C</div></div>
+      </div>
+    </div>
+    <p class="weather-location-hint">🌍 Allow location access for personalized weather updates</p>
+  </section>
+
+  <div class="hero">
+    <div class="hero-text">
+      <h1>Precision Cooling. Engineered Excellence.</h1>
+      <p>Uganda's Premier Partner for Industrial & Domestic Mechanical, Electrical, and Fire Protection Systems. ISO 9001 Certified.</p>
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="showPage('contact')">GET A QUOTE</button>
+        <a href="https://wa.me/256741333544" class="btn btn-whatsapp" target="_blank">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WA" width="20" height="20" style="filter: brightness(0) invert(1);">
+          CHAT ON WHATSAPP
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="trust-section">
+    <div class="trust-grid">
+      <div class="trust-item"><h3>25+</h3><p>Years Experience</p></div>
+      <div class="trust-item"><h3>200+</h3><p>Projects Completed</p></div>
+      <div class="trust-item"><h3>100%</h3><p>Certified Engineers</p></div>      <div class="trust-item"><h3>24/7</h3><p>Emergency Support</p></div>
+    </div>
+  </div>
+
+  <section class="certifications-section">
+    <div class="section-header">
+      <h2>Industry Certifications</h2>
+      <p>Click to learn more about our certifications</p>
+      <div class="line"></div>
+    </div>
+    <div class="cert-grid">
+      <div class="cert-item">
+        <div class="cert-badge" onclick="openCertModal('ISO 9001', 'Quality Management System', 'ISO 9001:2015 certification demonstrates our commitment to quality management and continuous improvement.')">
+          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSVB4SRZoP3mOe_0rUkw7R4-__fKyK5eubR73fdJUjPpqcw4_fCWIeEQXY&s=10" alt="ISO 9001">
+        </div>
+        <div class="cert-name">ISO 9001:2015</div>
+      </div>
+      <div class="cert-item">
+        <div class="cert-badge" onclick="openCertModal('NFPA', 'National Fire Protection Association', 'NFPA compliance ensures our fire protection systems meet the highest safety standards.')">
+          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRgbWg2ioMa-Oj-19A-VSaCtNP9rfrBW_HsuWFNrWRPm5RUb78oIp1C95Ri&s=10" alt="NFPA">
+        </div>
+        <div class="cert-name">NFPA Certified</div>
+      </div>
+      <div class="cert-item">
+        <div class="cert-badge" onclick="openCertModal('ASHRAE', 'American Society of Heating, Refrigerating and Air-Conditioning Engineers', 'ASHRAE certification ensures our HVAC systems meet international standards.')">
+          <img src="https://i.ytimg.com/vi/WmA11Tnv6WE/maxresdefault.jpg" alt="ASHRAE">
+        </div>
+        <div class="cert-name">ASHRAE Certified</div>
+      </div>
+      <div class="cert-item">
+        <div class="cert-badge" onclick="openCertModal('AMCA', 'Air Movement and Control Association', 'AMCA certification validates the performance of our ventilation systems.')">
+          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQY12SIbnaZpuOdMp-KhuJ7Dlww1b3_-41Y-StREnU3mw&s=10" alt="AMCA">
+        </div>
+        <div class="cert-name">AMCA Certified</div>
+      </div>
+      <div class="cert-item">
+        <div class="cert-badge" onclick="openCertModal('CFPS', 'Certified Fire Protection Specialist', 'CFPS certification demonstrates advanced knowledge in fire protection engineering.')">
+          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRcqezNZNJr1arh82Yi-tEfQGEtBb2s03pgKc72eIQT1N0T41OFc3rFnV8&s=10" alt="CFPS">
+        </div>
+        <div class="cert-name">CFPS Certified</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-header">
+      <h2>Our Capabilities</h2>
+      <p>Comprehensive MEP (Mechanical, Electrical, Plumbing) Solutions</p>
+      <div class="line"></div>
+    </div>    <div class="cards-grid">
+      <div class="card">
+        <div class="card-img-wrapper">
+          <img src="https://www.lg.com/content/dam/channelbtb/lgcom/in/reference/migration/multi-i/img/banner-1.jpg" alt="HVAC" class="card-img">
+          <span class="card-category">Mechanical</span>
+        </div>
+        <div class="card-body">
+          <h3>HVAC & Air Conditioning</h3>
+          <p>Design, installation, and maintenance of VRF, chiller plants, and ventilation systems.</p>
+          <div class="card-badges"><span class="badge red">ASHRAE Certified</span><span class="badge">AMCA Airflow</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-img-wrapper">
+          <img src="https://lexipol.brightspotcdn.com/dims4/default/c889f9c/2147483647/strip/true/crop/1200x675+0+191/resize/1440x810!/quality/90/?url=https%3A%2F%2Fk1-prod-lexipol.s3.us-east-2.amazonaws.com%2Fbrightspot%2F5e%2Fd0%2F8d0635bda7af4ccba84785a9e415%2F180116-f-ap587-0115-1.JPG" alt="Fire Fighting" class="card-img">
+          <span class="card-category">Safety</span>
+        </div>
+        <div class="card-body">
+          <h3>Fire Fighting Systems</h3>
+          <p>Industrial and domestic fire protection including sprinklers, alarms, and suppression systems.</p>
+          <div class="card-badges"><span class="badge red">NFPA Compliant</span><span class="badge">CFPS Certified</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-img-wrapper">
+          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS1KWpKs38atigJvHLSlsZnMwvrvvBW4xez4L63DeYMDCJWk1iWxZOVonY&s=10" alt="Power Systems" class="card-img">
+          <span class="card-category">Electrical</span>
+        </div>
+        <div class="card-body">
+          <h3>Power Systems</h3>
+          <p>High and low voltage power distribution, transformers, generators, and backup power solutions.</p>
+          <div class="card-badges"><span class="badge red">ISO 9001</span><span class="badge">Safety First</span></div>
+        </div>
+      </div>
+      <div class="card" onclick="openConsultancyModal()">
+        <div class="card-img-wrapper">
+          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRLERvbnmbxx50zqDEnp2sGoUFbNTUdeCWfJcLJbK584UdGAYXY62dwrvw&s=10" alt="Consultancy" class="card-img">
+          <span class="card-category">Consulting</span>
+        </div>
+        <div class="card-body">
+          <h3>Consultancy Services</h3>
+          <p>Expert guidance on HVAC selection, energy efficiency, and maintenance planning.</p>
+          <div class="card-badges"><span class="badge red">Free Consultation</span><span class="badge">Local Expertise</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="background: #f8fafc;">
+    <div class="section-header">      <h2>Why Choose Air System Coolers?</h2>
+      <div class="line"></div>
+    </div>
+    <div class="features-grid">
+      <div class="feature-box">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS3g1N2-KPLvqwevGPBZGf4iJE4VtmjYh3svG46Ktnr6lZ-QT1jBXHpE2P0&s=10" alt="Expertise">
+        <h3>25+ Years of Expertise</h3>
+        <p>Decades of experience handling complex industrial projects across East Africa.</p>
+      </div>
+      <div class="feature-box">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSVB4SRZoP3mOe_0rUkw7R4-__fKyK5eubR73fdJUjPpqcw4_fCWIeEQXY&s=10" alt="Certified">
+        <h3>Certified Quality</h3>
+        <p>ISO 9001 certified processes ensure consistent, high-quality engineering.</p>
+      </div>
+      <div class="feature-box">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRgbWg2ioMa-Oj-19A-VSaCtNP9rfrBW_HsuWFNrWRPm5RUb78oIp1C95Ri&s=10" alt="Safety">
+        <h3>Fire Safety Leaders</h3>
+        <p>NFPA and CFPS certified fire protection specialists keeping your assets safe.</p>
+      </div>
+      <div class="feature-box">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZEiyBiu9YPZ-F9Re3JJDlx_9D4nMnSa5VCLo3t9z-lWRhwIzcbVMGtQk&s=10" alt="Emergency">
+        <h3>1-Hour Emergency Response</h3>
+        <p>Rapid deployment team available 24/7 to resolve critical breakdowns within the hour.</p>
+      </div>
+      <div class="feature-box">
+        <img src="https://explorerdubailtd.com/uganda/wp-content/uploads/sites/22/2025/08/diverse-team-recondition-condenser-scaled.jpg" alt="Design">
+        <h3>Custom HVAC Design</h3>
+        <p>Tailored engineering designs optimized for energy efficiency and specific facility needs.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="weather-section">
+    <div class="section-header">
+      <h2>Trusted Partners</h2>
+      <p>Leading organizations we've collaborated with across Uganda</p>
+      <div class="line"></div>
+    </div>
+    <div class="partners-grid">
+      <div class="partner-card">
+        <img src="https://www.developmentaid.org/files/organizationLogos/china-communications-construction-co-limited-441890.jpg" alt="CCCC" class="partner-logo">
+        <h3>China Communications Construction Co.</h3>
+        <p>Leading international infrastructure contractor specializing in road construction, bridges, and large-scale civil engineering projects across Uganda including Kampala-Jinja Expressway and Entebbe Road upgrades.</p>
+        <span class="partner-sector">Infrastructure & Construction</span>
+      </div>
+      <div class="partner-card">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR3WeQ33nO8G9OIshPR6wv4Sn6rooYL1i88A2NsLjU7F-KyaLJv6SzOLwrb&s=10" alt="Pharmaceutical" class="partner-logo">
+        <h3>Pharmaceutical Industry</h3>
+        <p>Healthcare and medical facilities requiring specialized HVAC systems for temperature-controlled storage.</p>
+        <span class="partner-sector">Healthcare & Medical</span>
+      </div>
+      <div class="partner-card">
+        <img src="https://media.licdn.com/dms/image/v2/D4D22AQH1yT5fxATolg/feedshare-shrink_800/feedshare-shrink_800/0/1700744447242?e=2147483647&v=beta&t=LB2SvCrEGpb607uijKhLuT_57WFX78yE6LYcyVgXhbI" alt="Agago Power" class="partner-logo">
+        <h3>Agago Hydro Power Station</h3>
+        <p>Renewable energy generation facility requiring comprehensive electrical systems and fire protection.</p>        <span class="partner-sector">Energy & Power Generation</span>
+      </div>
+      <div class="partner-card">
+        <img src="https://sunrise.ug/images/800/2026/01/1767895627091_20260108_210410.jpg.web" alt="Electoral Printery" class="partner-logo">
+        <h3>Electoral Commission Printery</h3>
+        <p>Government printing facility requiring secure climate control and reliable power distribution.</p>
+        <span class="partner-sector">Public Sector Partners</span>
+      </div>
+      <div class="partner-card">
+        <img src="https://www.monitor.co.ug/resource/image/1569392/landscape_ratio3x2/1620/1080/5d48afe351bbeacccfd3120991c30df8/nU/national001-pix.jpg" alt="Military Airdrome" class="partner-logo">
+        <h3>Military Airdrome Nakasongola</h3>
+        <p>Defense aviation facility requiring specialized HVAC systems and fire safety systems.</p>
+        <span class="partner-sector">Defense & Aviation</span>
+      </div>
+      <div class="partner-card">
+        <img src="https://via.placeholder.com/300x120/dc2626/ffffff?text=Busia+Market" alt="Busia Market" class="partner-logo">
+        <h3>Busia Market Complex</h3>
+        <p>Commercial trading center requiring comprehensive electrical installations and ventilation systems.</p>
+        <span class="partner-sector">Commercial & Retail</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-header">
+      <h2>Featured Projects</h2>
+      <p>Real results across Kampala and beyond</p>
+      <div class="line"></div>
+    </div>
+    <div class="cards-grid" id="homeProjectsGrid"></div>
+    <div style="text-align: center; margin-top: 2rem;">
+      <button class="btn btn-primary" onclick="showPage('projects')">VIEW ALL CASE STUDIES</button>
+    </div>
+  </section>
+
+  <!-- TECHNICAL INSIGHTS SECTION ADDED HERE -->
+  <section style="background: #f8fafc;">
+    <div class="section-header">
+      <h2>Technical Insights</h2>
+      <p>Expert advice on HVAC efficiency and safety standards in Uganda</p>
+      <div class="line"></div>
+    </div>
+    <div class="cards-grid" id="blogGrid">
+      <!-- Blog cards injected via JS -->
+    </div>
+  </section>
+
+  <div class="cta-section">
+    <h2>Ready to Upgrade Your Systems?</h2>
+    <p>Get a free consultation and estimate from our certified engineers.</p>
+    <div class="btn-group">
+      <button class="btn" onclick="showPage('contact')">REQUEST QUOTE</button>
+      <a href="https://wa.me/256741333544" class="btn" style="background: #25D366; color: white;">WHATSAPP US</a>
+    </div>
+  </div>
+</div>
+
+<!-- ABOUT PAGE -->
+<div id="aboutPage" class="page">
+  <div class="section-header">
+    <h2>About Air System Coolers Ltd</h2>
+    <p>Engineering Excellence Since 2000</p>    <div class="line"></div>
+  </div>
+  <section style="max-width: 900px;">
+    <div style="background: white; padding: 2rem; border-radius: 12px; box-shadow: var(--shadow-sm); border: 2px solid #e5e7eb;">
+      <h3 style="color: var(--accent); margin-bottom: 1rem;">Our Mission</h3>
+      <p style="margin-bottom: 1rem;">At Air System Coolers, we don't just install equipment; we engineer comfort, safety, and efficiency. Our mission is to provide Uganda's industries and homes with world-class mechanical and electrical systems that stand the test of time.</p>
+      
+      <h3 style="color: var(--accent); margin-bottom: 1rem; margin-top: 2rem;">Why Partner With Us?</h3>
+      <ul style="margin-left: 1.5rem; margin-bottom: 1rem; line-height: 2;">
+        <li><strong>Engineering Precision:</strong> Every project is backed by rigorous calculation and design, ensuring optimal performance and energy efficiency.</li>
+        <li><strong>Safety First Culture:</strong> As NFPA and CFPS certified specialists, we adhere to the strictest international safety standards to protect your people and assets.</li>
+        <li><strong>Local Expertise, Global Standards:</strong> We understand Uganda's unique climate and power landscape, tailoring global best practices to local realities.</li>
+        <li><strong>Lifecycle Support:</strong> From initial design to 24/7 emergency maintenance, we are with you at every stage of your system's life.</li>
+      </ul>
+
+      <h3 style="color: var(--accent); margin-bottom: 1rem; margin-top: 2rem;">Our Divisions</h3>
+      <ul style="margin-left: 1.5rem; margin-bottom: 1rem; line-height: 2;">
+        <li><strong>Mechanical Systems:</strong> HVAC, Ventilation, and Air Filtration.</li>
+        <li><strong>Fire Protection:</strong> Industrial and domestic fire fighting systems.</li>
+        <li><strong>Electrical:</strong> Power distribution, installation, and automation.</li>
+      </ul>
+    </div>
+  </section>
+</div>
+
+<!-- SERVICES PAGE -->
+<div id="servicesPage" class="page">
+  <div class="section-header">
+    <h2>Our Services</h2>
+    <p>Comprehensive MEP Solutions</p>
+    <div class="line"></div>
+  </div>
+  <section>
+    <h3 style="font-size: 1.6rem; color: var(--accent); border-left: 5px solid var(--accent); padding-left: 1rem; margin-bottom: 1.5rem;">Mechanical Systems</h3>
+    <div class="cards-grid" style="margin-bottom: 3rem;">
+      <div class="card">
+        <div class="card-img-wrapper">
+          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS3g1N2-KPLvqwevGPBZGf4iJE4VtmjYh3svG46Ktnr6lZ-QT1jBXHpE2P0&s=10" alt="HVAC" class="card-img">
+        </div>
+        <div class="card-body">
+          <h3 style="color: var(--accent);">HVAC</h3>
+          <p>Heating, Ventilation, and Air Conditioning</p>
+          <div class="card-badges"><span class="badge red">ASHRAE Certified</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-img-wrapper">
+          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRkYXz1zuJzrhb7pzpplMfVuy_uPALAooENzpWVQdIzSRheYOQalzz9aznh&s=10" alt="AC" class="card-img">
+        </div>
+        <div class="card-body">
+          <h3 style="color: var(--accent);">Air Conditioning</h3>
+          <p>VRF systems, chillers, split units</p>
+          <div class="card-badges"><span class="badge">Daikin</span><span class="badge">Trane</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-img-wrapper">
+          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRjuB5JGQ80EFRyvU0avPBVBRaa-zB1rtPHromBeBaLz-ugiAVySHX7gA65&s=10" alt="Ventilation" class="card-img">
+        </div>        <div class="card-body">
+          <h3 style="color: var(--accent);">Ventilation</h3>
+          <p>Industrial exhaust and clean room filtration</p>
+          <div class="card-badges"><span class="badge red">AMCA Rated</span></div>
+        </div>
+      </div>
+    </div>
+    <h3 style="font-size: 1.6rem; color: var(--accent); border-left: 5px solid var(--accent); padding-left: 1rem; margin-bottom: 1.5rem;">Fire Protection</h3>
+    <div class="cards-grid" style="margin-bottom: 3rem;">
+      <div class="card">
+        <div class="card-img-wrapper">
+          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSQabp6b4GjYI8CRNaNhimbGdN6nzVnKva8kQA4aOZjyUVw7jdSpSLt1ec&s=10" alt="Sprinklers" class="card-img">
+        </div>
+        <div class="card-body">
+          <h3 style="color: var(--accent);">Sprinkler Systems</h3>
+          <p>Wet, dry, and pre-action sprinkler systems</p>
+          <div class="card-badges"><span class="badge red">NFPA 13</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-img-wrapper">
+          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR8csF0xgJqTEIZw2RUkP6pSjSl4GNrEB4P4W6PhXCACRv5lyAD-JxmID44&s=10" alt="Fire Alarms" class="card-img">
+        </div>
+        <div class="card-body">
+          <h3 style="color: var(--accent);">Fire Alarms</h3>
+          <p>Intelligent fire detection systems</p>
+          <div class="card-badges"><span class="badge red">NFPA 72</span></div>
+        </div>
+      </div>
+    </div>
+    <h3 style="font-size: 1.6rem; color: var(--accent); border-left: 5px solid var(--accent); padding-left: 1rem; margin-bottom: 1.5rem;">Electrical Systems</h3>
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-img-wrapper">
+          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZEiyBiu9YPZ-F9Re3JJDlx_9D4nMnSa5VCLo3t9z-lWRhwIzcbVMGtQk&s=10" alt="Power" class="card-img">
+        </div>
+        <div class="card-body">
+          <h3 style="color: var(--accent);">Power Systems</h3>
+          <p>Transformers, generators, and UPS systems</p>
+          <div class="card-badges"><span class="badge">High Voltage</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-img-wrapper">
+          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS40XY0E0fyW2JdYE43r3W2Kmj-zJKoahHWhqeG6ILBoo7VNoqLM4rFkM7Q&s=10" alt="Installations" class="card-img">
+        </div>
+        <div class="card-body">
+          <h3 style="color: var(--accent);">Installations</h3>
+          <p>Full building wiring and lighting control</p>
+          <div class="card-badges"><span class="badge red">ISO 9001</span></div>        </div>
+      </div>
+    </div>
+    <h3 style="font-size: 1.6rem; color: var(--accent); border-left: 5px solid var(--accent); padding-left: 1rem; margin-bottom: 1.5rem; margin-top: 3rem;">Consultancy Services</h3>
+    <div class="cards-grid">
+      <div class="card" onclick="openConsultancyModal()">
+        <div class="card-img-wrapper">
+          <img src="https://explorerdubailtd.com/uganda/wp-content/uploads/sites/22/2025/08/diverse-team-recondition-condenser-scaled.jpg" alt="HVAC Consulting" class="card-img">
+        </div>
+        <div class="card-body">
+          <h3 style="color: var(--accent);">HVAC System Selection</h3>
+          <p>Expert guidance on choosing the right HVAC system</p>
+          <div class="card-badges"><span class="badge red">Free Assessment</span></div>
+        </div>
+      </div>
+      <div class="card" onclick="openConsultancyModal()">
+        <div class="card-img-wrapper">
+          <img src="https://i0.wp.com/observer.ug/wp-content/uploads/2017/12/Umeme-staff-at-work.jpg?fit=760%2C584&ssl=1" alt="Energy Consulting" class="card-img">
+        </div>
+        <div class="card-body">
+          <h3 style="color: var(--accent);">Energy Efficiency Consulting</h3>
+          <p>Reduce your energy bills with expert advice</p>
+          <div class="card-badges"><span class="badge red">ROI Analysis</span></div>
+        </div>
+      </div>
+      <div class="card" onclick="openConsultancyModal()">
+        <div class="card-img-wrapper">
+          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSQabp6b4GjYI8CRNaNhimbGdN6nzVnKva8kQA4aOZjyUVw7jdSpSLt1ec&s=10" alt="Maintenance Planning" class="card-img">
+        </div>
+        <div class="card-body">
+          <h3 style="color: var(--accent);">Maintenance Planning</h3>
+          <p>Customized maintenance schedules</p>
+          <div class="card-badges"><span class="badge">Preventive Care</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- PROJECTS PAGE -->
+<div id="projectsPage" class="page">
+  <div class="section-header">
+    <h2>Case Studies</h2>
+    <p>Problem → Solution → Result</p>
+    <div class="line"></div>
+  </div>
+  <section>
+    <div class="cards-grid" id="projectsGrid"></div>
+  </section>
+</div>
+<!-- CONTACT PAGE -->
+<div id="contactPage" class="page">
+  <div class="section-header">
+    <h2>Contact Us</h2>
+    <p>Get in touch with our engineering team</p>
+    <div class="line"></div>
+  </div>
+  <section>
+    <div class="contact-grid">
+      <div class="contact-card">
+        <h3 style="color: var(--accent); margin-bottom: 1.5rem; font-weight: 700;">Contact Information</h3>
+        <div style="margin-bottom: 1.5rem; border-radius: 8px; overflow: hidden;">
+          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS3g1N2-KPLvqwevGPBZGf4iJE4VtmjYh3svG46Ktnr6lZ-QT1jBXHpE2P0&s=10" alt="Our Team" style="width: 100%; height: 200px; object-fit: cover;">
+        </div>
+        <div class="contact-info">
+          <div class="info-item"><div class="info-icon">📍</div><div><h4 style="color: var(--accent); margin-bottom: 0.3rem;">Head Office</h4><p>Kampala, Uganda<br>Industrial Area</p></div></div>
+          <div class="info-item"><div class="info-icon">📞</div><div><h4 style="color: var(--accent); margin-bottom: 0.3rem;">Phone</h4><p><a href="tel:+256741333544" style="color: var(--accent); font-weight: 600;">+256 741 333 544</a></p></div></div>
+          <div class="info-item"><div class="info-icon">📧</div><div><h4 style="color: var(--accent); margin-bottom: 0.3rem;">Email</h4><p>info@airsystemcoolers.com</p></div></div>
+          <div class="info-item"><div class="info-icon">💬</div><div><h4 style="color: var(--accent); margin-bottom: 0.3rem;">WhatsApp</h4><p><a href="https://wa.me/256741333544" style="color: #25D366; font-weight: 600;">Chat with an Engineer</a></p></div></div>
+        </div>
+      </div>
+      <div class="contact-card">
+        <h3 style="color: var(--accent); margin-bottom: 1rem; font-weight: 700;">Send us a Message</h3>
+        <form id="contactForm" data-endpoint="/api/contact" data-action="contact_submit">
+          <input type="text" name="name" placeholder="Full Name" required>
+          <input type="email" name="email" placeholder="Email Address" required>
+          <input type="tel" name="phone" placeholder="Phone Number">
+          <textarea name="message" rows="5" placeholder="Project Details or Enquiry..." required></textarea>
+          <button type="submit" class="btn btn-primary" style="width: 100%;">SEND MESSAGE</button>
+          <div id="formStatus" class="form-message"></div>
+        </form>
+      </div>
+    </div>
+  </section>
+  
+  <section style="margin-top: 3rem; border-top: 2px solid #e5e7eb; padding-top: 3rem;">
+    <div class="section-header">
+      <h2>Technical Insights</h2>
+      <p>Expert advice on HVAC and Electrical Systems</p>
+      <div class="line"></div>
+    </div>
+    <div class="cards-grid" id="blogGrid"></div>
+  </section>
+</div>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-col">
+      <h4>Air System Coolers Ltd</h4>      <p>Uganda's trusted partner for industrial and domestic mechanical, electrical, and fire protection systems.</p>
+      <div style="margin-top: 1rem; display: flex; gap: 0.5rem;"><span class="badge">ISO 9001</span><span class="badge">NFPA</span></div>
+    </div>
+    <div class="footer-col">
+      <h4>Services</h4>
+      <a href="#" onclick="showPage('services')">HVAC Systems</a>
+      <a href="#" onclick="showPage('services')">Fire Fighting</a>
+      <a href="#" onclick="showPage('services')">Electrical Power</a>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <a href="#" onclick="showPage('about')">About Us</a>
+      <a href="#" onclick="showPage('projects')">Projects</a>
+      <a href="#" onclick="showPage('contact')">Contact</a>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <p>Kampala, Uganda</p>
+      <p><a href="tel:+256741333544" style="font-weight: 600;">+256 741 333 544</a></p>
+      <p>info@airsystemcoolers.com</p>
+    </div>
+  </div>
+  <div class="copyright">© 2025 Air System Coolers Limited. All Rights Reserved.</div>
+</footer>
+
+<a href="https://wa.me/256741333544" class="whatsapp-float" target="_blank" title="Chat on WhatsApp">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
+</a>
+
+<div class="chatbot-widget">
+  <div class="chatbot-window" id="chatbotWindow">
+    <div class="chatbot-header">
+      <h3>🤖 AI Assistant</h3>
+      <div class="chatbot-controls">
+        <button class="chatbot-minimize" onclick="toggleChatbot()" title="Minimize">_</button>
+        <button class="chatbot-close" onclick="toggleChatbot()" title="Close">×</button>
+      </div>
+    </div>
+    <div class="chatbot-messages" id="chatMessages">
+      <div class="chat-message bot">Hello! I'm your AI assistant for Air System Coolers. How can I help you today?</div>
+    </div>
+    <div class="chatbot-input">
+      <input type="text" id="chatInput" placeholder="Type your message..." onkeypress="handleChatKeypress(event)">
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+  <button class="chatbot-toggle" onclick="toggleChatbot()">💬</button>
+</div>
+
+<div id="certModal" class="modal">
+  <div class="modal-card">
+    <span class="modal-close" onclick="closeCertModal()">&times;</span>
+    <div class="modal-content">      <h2 id="certTitle" style="color: var(--accent); margin-bottom: 0.5rem; font-weight: 800;"></h2>
+      <h3 id="certSubtitle" style="color: var(--primary-dark); margin-bottom: 1rem; font-size: 1.1rem;"></h3>
+      <p id="certDesc" style="line-height: 1.8; color: #374151; font-size: 0.95rem;"></p>
+    </div>
+  </div>
+</div>
+
+<div id="consultancyModal" class="modal">
+  <div class="modal-card">
+    <span class="modal-close" onclick="closeConsultancyModal()">&times;</span>
+    <div class="modal-content">
+      <h2 style="color: var(--accent); margin-bottom: 0.5rem; font-weight: 800;">Consultancy Services</h2>
+      <p style="color: #6b7280; margin-bottom: 1.5rem; font-size: 0.9rem;">Get expert advice tailored to your business needs in Uganda.</p>
+      <form id="consultancyForm" data-endpoint="/api/counseling" data-action="counseling_submit">
+        <input type="text" name="name" placeholder="Full Name" required>
+        <input type="email" name="email" placeholder="Email Address" required>
+        <input type="tel" name="phone" placeholder="Phone Number" required>
+        <select name="service" style="width: 100%; padding: 10px; border: 2px solid #d1d5db; border-radius: 8px; margin-bottom: 0.8rem; font-family: inherit; font-size: 0.9rem;">
+          <option value="">Select Service</option>
+          <option value="HVAC">HVAC System Selection</option>
+          <option value="Energy">Energy Efficiency Consulting</option>
+          <option value="Maintenance">Maintenance Planning</option>
+          <option value="Other">Other</option>
+        </select>
+        <textarea name="message" rows="4" placeholder="Tell us about your project or needs..." required></textarea>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">REQUEST CONSULTATION</button>
+        <div id="consultancyStatus" class="form-message"></div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div id="projectModal" class="modal">
+  <div class="modal-card">
+    <span class="modal-close" onclick="closeProjectModal()">&times;</span>
+    <img id="modalImg" src="" alt="Project" class="modal-img">
+    <div class="modal-content">
+      <h2 id="modalTitle" style="color: var(--primary-dark); margin-bottom: 0.5rem; font-weight: 800;"></h2>
+      <p id="modalLocation" style="color: var(--accent); font-weight: 700; margin-bottom: 1rem;"></p>
+      <div id="modalDesc" style="line-height: 1.6; color: #374151; font-size: 0.9rem;"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+<script>
+// ==========================================
+// BACKEND API CONFIGURATION
+// ==========================================
+// ⚠️ CHANGE THIS TO YOUR RENDER BACKEND URL AFTER DEPLOYMENT
+// Example: const API_BASE = 'https://air-system-api.onrender.com';
+const API_BASE = 'http://localhost:5000'; 
+
+// ==========================================
+// CSRF & API UTILITIES
+// ==========================================
+let csrfToken = null;
+
+async function fetchCsrfToken() {
+  try {
+    const response = await fetch(`${API_BASE}/api/csrf-token`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    if (response.ok) {
+      const data = await response.json();
+      csrfToken = data.csrf_token;
+      document.cookie = `csrf_token=${csrfToken}; path=/; Secure; SameSite=Strict`;
+      return true;
+    }
+  } catch (error) {
+    console.error('Failed to fetch CSRF token:', error);
+  }
+  return false;
+}
+
+async function getRecaptchaToken(action) {
+  return new Promise((resolve) => {
+    if (typeof grecaptcha !== 'undefined') {
+      grecaptcha.ready(function() {
+        grecaptcha.execute('YOUR_RECAPTCHA_SITE_KEY_HERE', { action: action }).then(resolve);
+      });
+    } else {
+      resolve('demo-token'); // Fallback for testing
+    }
+  });
+}
+
+async function submitForm(endpoint, formData, action) {
+  const recaptchaToken = await getRecaptchaToken(action);
+  
+  const payload = {
+    ...formData,
+    recaptcha_token: recaptchaToken
+  };
+  
+  const response = await fetch(`${API_BASE}${endpoint}`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': csrfToken || ''
+    },
+    body: JSON.stringify(payload)
+  });
+  
+  return await response.json();
+}
+
+// ==========================================
+// FORM HANDLERS
+// ==========================================
+function showFormMessage(formId, message, isSuccess) {
+  const statusEl = document.getElementById(formId === 'contactForm' ? 'formStatus' : 'consultancyStatus');
+  if (statusEl) {
+    statusEl.textContent = message;
+    statusEl.className = `form-message ${isSuccess ? 'success' : 'error'}`;
+  }
+}
+
+function setLoading(button, isLoading) {
+  if (isLoading) {
+    button.dataset.originalText = button.textContent;
+    button.textContent = 'Sending...';
+    button.classList.add('btn-loading');
+    button.disabled = true;
+  } else {
+    button.textContent = button.dataset.originalText || 'Send';
+    button.classList.remove('btn-loading');
+    button.disabled = false;
+  }
+}
+
+function handleFormSubmit(event) {
+  event.preventDefault();
+  
+  const form = event.target;
+  const submitBtn = form.querySelector('button[type="submit"]');
+  const endpoint = form.dataset.endpoint;
+  const action = form.dataset.action;
+  
+  // Collect form data
+  const formData = {};
+  new FormData(form).forEach((value, key) => {
+    formData[key] = value.trim();
+  });
+  
+  setLoading(submitBtn, true);  
+  submitForm(endpoint, formData, action)
+    .then(response => {
+      if (response.success) {
+        showFormMessage(form.id, response.message, true);
+        form.reset();
+        // Show reference number if available
+        if (response.reference) {
+          showFormMessage(form.id, `${response.message} Ref: ${response.reference}`, true);
+        }
+      } else {
+        showFormMessage(form.id, response.error || 'Submission failed. Please try again.', false);
+      }
+    })
+    .catch(error => {
+      console.error('Form submission error:', error);
+      showFormMessage(form.id, 'Network error. Please check your connection and try again.', false);
+    })
+    .finally(() => {
+      setLoading(submitBtn, false);
+    });
+}
+
+// ==========================================
+// NAVIGATION
+// ==========================================
+function showPage(pageId) {
+  document.querySelectorAll('.page').forEach(function(p) {
+    p.classList.remove('active-page');
+    p.style.display = 'none';
+  });
+  
+  var page = document.getElementById(pageId + 'Page');
+  if (page) {
+    page.style.display = 'block';
+    setTimeout(function() {
+      page.classList.add('active-page');
+    }, 10);
+    
+    document.querySelectorAll('.nav-btn').forEach(function(btn) {
+      btn.classList.remove('active-page-btn');
+    });
+    var activeBtn = document.querySelector('.nav-btn[data-page="' + pageId + '"]');
+    if (activeBtn) activeBtn.classList.add('active-page-btn');
+    
+    window.scrollTo(0, 0);
+  }
+}
+
+document.querySelectorAll('.nav-btn').forEach(function(btn) {  btn.addEventListener('click', function() {
+    showPage(this.dataset.page);
+  });
+});
+
+// ==========================================
+// CHATBOT LOGIC (CONNECTED TO GROK BACKEND)
+// ==========================================
+let chatHistory = []; // Store conversation context
+
+function toggleChatbot() {
+  var chatWindow = document.getElementById('chatbotWindow');
+  if (chatWindow) {
+    if (chatWindow.classList.contains('active')) {
+      chatWindow.classList.remove('active');
+      setTimeout(() => { chatWindow.style.display = 'none'; }, 300); // Wait for animation
+    } else {
+      chatWindow.style.display = 'flex';
+      // Small delay to allow display:flex to apply before adding active class for animation
+      setTimeout(() => { chatWindow.classList.add('active'); }, 10);
+      // Focus input when opened
+      setTimeout(() => document.getElementById('chatInput').focus(), 100);
+    }
+  }
+}
+
+function handleChatKeypress(event) {
+  if (event.key === 'Enter') sendMessage();
+}
+
+async function sendMessage() {
+  var input = document.getElementById('chatInput');
+  var message = input.value.trim();
+  if (!message) return;
+  
+  var container = document.getElementById('chatMessages');
+  
+  // 1. Display User Message
+  var userDiv = document.createElement('div');
+  userDiv.className = 'chat-message user';
+  userDiv.textContent = message;
+  container.appendChild(userDiv);
+  
+  input.value = '';
+  container.scrollTop = container.scrollHeight;
+  
+  // 2. Show Loading Indicator
+  var loadingDiv = document.createElement('div');
+  loadingDiv.className = 'chat-message bot';
+  loadingDiv.textContent = 'Typing...';
+  loadingDiv.id = 'loadingMsg';
+  container.appendChild(loadingDiv);
+  container.scrollTop = container.scrollHeight;
+
+  // 3. Send to Backend API
+  try {
+    const response = await fetch(`${API_BASE}/api/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: message,
+        history: chatHistory
+      })
+    });
+
+    const data = await response.json();
+    
+    // Remove loading message
+    document.getElementById('loadingMsg').remove();
+
+    // 4. Display Bot Response
+    var botDiv = document.createElement('div');
+    botDiv.className = 'chat-message bot';
+    botDiv.textContent = data.reply || "Sorry, I couldn't process that.";
+    container.appendChild(botDiv);
+    
+    // Update History (Keep last 6 messages: 3 pairs)
+    chatHistory.push({ role: "user", content: message });
+    chatHistory.push({ role: "assistant", content: data.reply });
+    if (chatHistory.length > 6) chatHistory = chatHistory.slice(-6);
+
+  } catch (error) {
+    document.getElementById('loadingMsg').remove();
+    var errorDiv = document.createElement('div');
+    errorDiv.className = 'chat-message bot';
+    errorDiv.textContent = "Connection error. Please check your internet.";
+    container.appendChild(errorDiv);
+    console.error('Chat error:', error);
+  }
+  
+  container.scrollTop = container.scrollHeight;
+}
+
+// ==========================================
+// MODALS
+// ==========================================
+function openCertModal(title, subtitle, desc) {  document.getElementById('certTitle').innerText = title;
+  document.getElementById('certSubtitle').innerText = subtitle;
+  document.getElementById('certDesc').innerText = desc;
+  document.getElementById('certModal').style.display = 'flex';
+}
+
+function closeCertModal() {
+  document.getElementById('certModal').style.display = 'none';
+}
+
+function openConsultancyModal() {
+  document.getElementById('consultancyModal').style.display = 'flex';
+}
+
+function closeConsultancyModal() {
+  document.getElementById('consultancyModal').style.display = 'none';
+}
+
+function closeProjectModal() {
+  document.getElementById('projectModal').style.display = 'none';
+}
+
+// ==========================================
+// PROJECTS DATA & RENDER
+// ==========================================
+var projects = [
+  { 
+    id: 'p1', 
+    title: 'Agago Hydro Power', 
+    location: 'Agago, Uganda', 
+    img: 'https://media.licdn.com/dms/image/v2/D4D22AQH1yT5fxATolg/feedshare-shrink_800/feedshare-shrink_800/0/1700744447242?e=2147483647&v=beta&t=LB2SvCrEGpb607uijKhLuT_57WFX78yE6LYcyVgXhbI', 
+    problem: 'Critical overheating in turbine control rooms causing system shutdowns.', 
+    solution: 'Installed precision VRF cooling system with redundant backup units.', 
+    result: '35% energy reduction and 100% uptime since installation.' 
+  },
+  { 
+    id: 'p2', 
+    title: 'CCCC Project', 
+    location: 'Nsambya, Kampala', 
+    img: 'https://www.developmentaid.org/files/organizationLogos/china-communications-construction-co-limited-441890.jpg', 
+    problem: 'Outdated fire protection systems failing modern safety audits.', 
+    solution: 'Complete retrofit of sprinkler network and intelligent alarm integration.', 
+    result: 'Fully NFPA compliant certification achieved within 2 weeks.' 
+  },
+  { 
+    id: 'p3', 
+    title: 'Industrial Area Factory', 
+    location: 'Industrial Area, Kampala', 
+    img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRqpli5VlK8VhcC1Mle9rFjEKgYW_Qh8heBAm1pVOzXZ7K-p4bv3OGFj2qu&s=10', 
+    problem: 'Frequent power outages disrupting production lines.', 
+    solution: 'Installation of 500kVA standby generator with automatic transfer switch.', 
+    result: '99.9% operational uptime and zero production loss during grid failures.' 
+  },
+  { 
+    id: 'p4', 
+    title: 'Jinja Manufacturing', 
+    location: 'Jinja, Uganda', 
+    img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQGU7hUrnYplW7gEs8AglR8wVFfBFmpTIiAtuyUC4074ZNlNrsfW34oFONy&s=10', 
+    problem: 'Poor air quality and heat buildup affecting worker productivity.', 
+    solution: 'Industrial exhaust system with heat recovery ventilation.', 
+    result: '20% increase in productivity and improved indoor air quality metrics.' 
+  }
+];
+
+var blogs = [
+  {
+    title: "Maximizing HVAC Efficiency in Uganda's Climate",
+    desc: "How proper insulation and VRF systems can reduce your energy bills by up to 40% in tropical climates.",
+    icon: "❄️"
+  },
+  {
+    title: "The Importance of NFPA Compliance",
+    desc: "Why adhering to National Fire Protection Association standards is critical for industrial safety in Kampala.",
+    icon: "🔥"
+  },
+  {
+    title: "Power Stability: Generators vs. UPS",
+    desc: "Understanding the right backup power solution for your specific business needs to prevent data loss.",
+    icon: "⚡"
+  }
+];
+
+function renderProjects() {
+  var container = document.getElementById('projectsGrid');
+  var homeContainer = document.getElementById('homeProjectsGrid');
+  
+  if (!container) return;
+  container.innerHTML = '';
+  
+  projects.forEach(function(p) {
+    var card = document.createElement('div');
+    card.className = 'card project-card';
+    card.innerHTML = '<div class="card-img-wrapper"><img src="' + p.img + '" alt="' + p.title + '" class="card-img"></div><div class="card-body"><h3>' + p.title + '</h3><p style="color: var(--accent); font-weight: 700; margin-bottom: 0.5rem; font-size: 0.85rem;">' + p.location + '</p><p style="font-size: 0.85rem;">' + p.problem.substring(0, 60) + '...</p><button class="read-more" onclick="openProject(\'' + p.id + '\')" style="background: none; border: none; color: var(--accent); font-weight: 700; cursor: pointer; margin-top: 1rem; font-size: 0.85rem;">VIEW CASE STUDY →</button></div>';
+    container.appendChild(card);
+  });
+
+  if (homeContainer) {
+    homeContainer.innerHTML = '';
+    projects.slice(0, 2).forEach(function(p) {
+      var card = document.createElement('div');      card.className = 'card project-card';
+      card.innerHTML = '<div class="card-img-wrapper"><img src="' + p.img + '" alt="' + p.title + '" class="card-img"></div><div class="card-body"><h3>' + p.title + '</h3><p style="color: var(--accent); font-weight: 700; margin-bottom: 0.5rem; font-size: 0.85rem;">' + p.location + '</p><p style="font-size: 0.85rem;">' + p.result + '</p><button class="read-more" onclick="openProject(\'' + p.id + '\')" style="background: none; border: none; color: var(--accent); font-weight: 700; cursor: pointer; margin-top: 1rem; font-size: 0.85rem;">VIEW CASE STUDY →</button></div>';
+      homeContainer.appendChild(card);
+    });
+  }
+}
+
+function renderBlogs() {
+  var containers = document.querySelectorAll('#blogGrid');
+  containers.forEach(function(container) {
+    if(!container) return;
+    container.innerHTML = '';
+    blogs.forEach(function(b) {
+      var card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = '<div class="card-body"><div style="font-size: 2rem; margin-bottom: 1rem;">' + b.icon + '</div><h3>' + b.title + '</h3><p>' + b.desc + '</p></div>';
+      container.appendChild(card);
+    });
+  });
+}
+
+function openProject(id) {
+  var p = projects.find(function(proj) { return proj.id === id; });
+  if (!p) return;
+  
+  document.getElementById('modalTitle').innerText = p.title;
+  document.getElementById('modalLocation').innerText = p.location;
+  document.getElementById('modalImg').src = p.img;
+  document.getElementById('modalDesc').innerHTML = '<p style="margin-bottom: 1rem;"><strong style="color: var(--accent);">Challenge:</strong> ' + p.problem + '</p><p style="margin-bottom: 1rem;"><strong style="color: var(--accent);">Engineering Solution:</strong> ' + p.solution + '</p><p style="margin-bottom: 1rem;"><strong style="color: var(--accent);">Business Impact:</strong> ' + p.result + '</p>';
+  document.getElementById('projectModal').style.display = 'flex';
+}
+
+// ==========================================
+// MAP & WEATHER
+// ==========================================
+var map;
+function initMap() {
+  if (!document.getElementById('map')) return;
+  if (typeof L !== 'undefined') {
+    map = L.map('map').setView([1.3733, 32.2903], 7);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+  }
+}
+
+async function fetchWeather() {
+  const cities = ['Kampala', 'Jinja', 'Gulu', 'Mbarara'];
+  const weatherCards = document.getElementById('weatherCards');
+  
+  if (!weatherCards) return;
+
+  // Fetch real data from backend
+  for (let i = 0; i < cities.length; i++) {
+    const city = cities[i];
+    try {
+      const res = await fetch(`${API_BASE}/api/weather?city=${city}`);
+      const data = await res.json();
+      
+      if (weatherCards.children[i]) {
+        weatherCards.children[i].innerHTML = `
+          <div>
+            <h4>${city}</h4>
+            <p>${data.desc}</p>
+            <p style="font-size: 0.85rem; color: var(--accent);">Humidity: ${data.humidity}%</p>
+          </div>
+          <div class="weather-temp">${data.temp}°C</div>
+        `;
+      }
+    } catch (e) {
+      console.error(`Weather fetch failed for ${city}`, e);
+    }
+  }
+}
+
+function requestLocation() {
+  if ("geolocation" in navigator && map) {
+    navigator.geolocation.getCurrentPosition(
+      function(position) {
+        var latitude = position.coords.latitude;
+        var longitude = position.coords.longitude;
+        map.setView([latitude, longitude], 10);
+        L.marker([latitude, longitude]).addTo(map).bindPopup("<b>Your Location</b>").openPopup();
+      },
+      function(error) {
+        console.log("Location access denied or unavailable");
+      }
+    );
+  }
+}
+
+// ==========================================
+// EVENT LISTENERS & INIT
+// ==========================================
+document.addEventListener('DOMContentLoaded', async function() {
+  // Initialize forms with backend integration
+  const contactForm = document.getElementById('contactForm');
+  const consultancyForm = document.getElementById('consultancyForm');
+  
+  if (contactForm) contactForm.addEventListener('submit', handleFormSubmit);
+  if (consultancyForm) consultancyForm.addEventListener('submit', handleFormSubmit);
+  
+  // Fetch CSRF token on load
+  await fetchCsrfToken();
+  
+  // Initialize other features
+  renderProjects();
+  renderBlogs();
+  initMap();
+  fetchWeather();
+  requestLocation();
+});
+
+// Modal close handlers
+window.addEventListener('click', function(e) {
+  if (e.target.classList.contains('modal')) {
+    e.target.style.display = 'none';
+  }
+});
+
+// Scroll nav effect
+window.addEventListener('scroll', function() {
+  var navbar = document.getElementById('navbar');
+  if (navbar) {
+    navbar.classList.toggle('scrolled', window.scrollY > 50);
+  }});
+
+// Background slider
+var bgSlides = document.querySelectorAll('.bg-slide');
+var bgCurr = 0;
+setInterval(function() {
+  if (bgSlides.length < 3) return;
+  bgSlides[bgCurr].classList.remove('active');
+  bgCurr = (bgCurr + 1) % bgSlides.length;
+  bgSlides[bgCurr].classList.add('active');
+}, 6000);
+</script>
+</body>
+</html>
