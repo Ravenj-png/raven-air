@@ -13,10 +13,9 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
 # Pydantic v1 imports
-# ... (imports at the top) ...
 # Update this line to include Field
 from pydantic import BaseModel, EmailStr, validator, Field
-from typing import Optional 
+from typing import Optional
 from tenacity import retry, stop_after_attempt, wait_exponential
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
