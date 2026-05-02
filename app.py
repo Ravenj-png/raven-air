@@ -18,25 +18,35 @@ app = Flask(__name__)
 
 # Config
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-key-change-me')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///airsystem.db')
+
+# Database Configuration: Uses Render's DATABASE_URL if available, else SQLite
+db_url = os.environ.get('DATABASE_URL')
+if db_url and db_url.startswith('postgres://'):
+    # Fix for newer SQLAlchemy versions requiring postgresql:// instead of postgres://
+    db_url = db_url.replace('postgres://', 'postgresql://', 1)
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_url
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///airsystem.db'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Security Headers (CSP)
+# Security Headers (CSP) - Strict for Production
 CSP_POLICY = {
     'default-src': "'self'",
     'script-src': ["'self'", "https://www.google.com", "https://www.gstatic.com", "https://unpkg.com"],
     'style-src': ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-    'img-src': ["'self'", "https:", "data:"],
+    'img-src': ["'self'", "https:", ""],
     'connect-src': ["'self'", "https://api.openweathermap.org", "https://api.x.ai"],
 }
-Talisman(app, force_https=False, content_security_policy=CSP_POLICY)
+# Force HTTPS in production
+Talisman(app, force_https=True, content_security_policy=CSP_POLICY)
 
-# CORS
-ALLOWED_ORIGINS = [
-    os.environ.get('FRONTEND_URL', 'http://localhost:5500'),
-    'https://*.onrender.com',
-    'http://127.0.0.1:5500'
-]
+# CORS - Strictly allow only your GitHub Pages Frontend and Render Backend
+FRONTEND_URL = 'https://ravenj-png.github.io'
+BACKEND_URL = 'https://raven-air.onrender.com'
+
+ALLOWED_ORIGINS = [FRONTEND_URL, BACKEND_URL, 'http://localhost:5500'] # Localhost for testing
+
 CORS(app, resources={r"/api/*": {"origins": ALLOWED_ORIGINS, "methods": ["GET", "POST"], "allow_headers": ["Content-Type", "X-CSRF-Token"], "supports_credentials": True}})
 
 # Rate Limiting
@@ -165,7 +175,8 @@ def health():
 def get_csrf_token():
     token = jwt.encode({'exp': datetime.utcnow() + timedelta(hours=1)}, app.config['SECRET_KEY'], algorithm='HS256')
     resp = make_response(jsonify({'csrf_token': token}))
-    resp.set_cookie('csrf_token', token, httponly=False, secure=False, samesite='Lax')
+    # Secure cookie settings for production
+    resp.set_cookie('csrf_token', token, httponly=False, secure=True, samesite='None')
     return resp
 
 @app.route('/api/weather', methods=['GET'])
@@ -278,9 +289,9 @@ def submit_counseling():
     )
     db.session.add(sub)
     db.session.commit()
-    
+
     send_email(sub)
-    
+
     return jsonify({'success': True, 'message': 'Consultation request received!', 'reference': f"CNS-{sub.id}"}), 201
 
 # Error handlers
@@ -292,5 +303,10 @@ def rate_limit(e): return jsonify({'error': 'Too many requests. Please wait.'}),
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
+
+    # Get port from environment variable, default to 5000 if not found
     port = int(os.environ.get('PORT', 5000))
+
+    # For production (Render), we usually use Gunicorn, but this fallback helps for debugging
+    # Ensure host is 0.0.0.0 so it accepts external connections
     app.run(host='0.0.0.0', port=port, debug=False)
