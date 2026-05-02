@@ -994,7 +994,7 @@
       </div>
       <div class="contact-card">
         <h3 style="color: var(--accent); margin-bottom: 1rem; font-weight: 700;">Send us a Message</h3>
-        <form id="contactForm" data-endpoint="/api/contact" data-action="contact_submit">
+        <form id="contactForm" data-endpoint="/api/v1/contact" data-action="contact_submit">
           <input type="text" name="name" placeholder="Full Name" required>
           <input type="email" name="email" placeholder="Email Address" required>
           <input type="tel" name="phone" placeholder="Phone Number">
@@ -1084,7 +1084,7 @@
     <div class="modal-content">
       <h2 style="color: var(--accent); margin-bottom: 0.5rem; font-weight: 800;">Consultancy Services</h2>
       <p style="color: #6b7280; margin-bottom: 1.5rem; font-size: 0.9rem;">Get expert advice tailored to your business needs in Uganda.</p>
-      <form id="consultancyForm" data-endpoint="/api/counseling" data-action="counseling_submit">
+      <form id="consultancyForm" data-endpoint="/api/v1/counseling" data-action="counseling_submit">
         <input type="text" name="name" placeholder="Full Name" required>
         <input type="email" name="email" placeholder="Email Address" required>
         <input type="tel" name="phone" placeholder="Phone Number" required>
@@ -1121,9 +1121,9 @@
 // ==========================================
 // BACKEND API CONFIGURATION
 // ==========================================
-// ⚠️ CHANGE THIS TO YOUR RENDER BACKEND URL AFTER DEPLOYMENT
-// Example: const API_BASE = 'https://air-system-api.onrender.com';
 const API_BASE = 'https://raven-air.onrender.com'; 
+// ⚠️ REPLACE THIS WITH THE KEY YOU PUT IN YOUR .env FILE (API_CHAT_KEY)
+const CHAT_API_KEY = 'my-super-secret-chat-key-123'; 
 
 // ==========================================
 // CSRF & API UTILITIES
@@ -1132,7 +1132,8 @@ let csrfToken = null;
 
 async function fetchCsrfToken() {
   try {
-    const response = await fetch(`${API_BASE}/api/csrf-token`, {
+    // Updated to v1 endpoint
+    const response = await fetch(`${API_BASE}/api/v1/csrf-token`, {
       method: 'GET',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' }
@@ -1140,7 +1141,6 @@ async function fetchCsrfToken() {
     if (response.ok) {
       const data = await response.json();
       csrfToken = data.csrf_token;
-      document.cookie = `csrf_token=${csrfToken}; path=/; Secure; SameSite=Strict`;
       return true;
     }
   } catch (error) {
@@ -1153,10 +1153,11 @@ async function getRecaptchaToken(action) {
   return new Promise((resolve) => {
     if (typeof grecaptcha !== 'undefined') {
       grecaptcha.ready(function() {
+        // REPLACE WITH YOUR ACTUAL SITE KEY FROM GOOGLE ADMIN CONSOLE
         grecaptcha.execute('YOUR_RECAPTCHA_SITE_KEY_HERE', { action: action }).then(resolve);
       });
     } else {
-      resolve('demo-token'); // Fallback for testing
+      resolve('demo-token'); // Fallback for testing only
     }
   });
 }
@@ -1226,7 +1227,6 @@ function handleFormSubmit(event) {
       if (response.success) {
         showFormMessage(form.id, response.message, true);
         form.reset();
-        // Show reference number if available
         if (response.reference) {
           showFormMessage(form.id, `${response.message} Ref: ${response.reference}`, true);
         }
@@ -1269,7 +1269,8 @@ function showPage(pageId) {
   }
 }
 
-document.querySelectorAll('.nav-btn').forEach(function(btn) {  btn.addEventListener('click', function() {
+document.querySelectorAll('.nav-btn').forEach(function(btn) {  
+  btn.addEventListener('click', function() {
     showPage(this.dataset.page);
   });
 });
@@ -1277,19 +1278,17 @@ document.querySelectorAll('.nav-btn').forEach(function(btn) {  btn.addEventListe
 // ==========================================
 // CHATBOT LOGIC (CONNECTED TO GROK BACKEND)
 // ==========================================
-let chatHistory = []; // Store conversation context
+let chatHistory = []; 
 
 function toggleChatbot() {
   var chatWindow = document.getElementById('chatbotWindow');
   if (chatWindow) {
     if (chatWindow.classList.contains('active')) {
       chatWindow.classList.remove('active');
-      setTimeout(() => { chatWindow.style.display = 'none'; }, 300); // Wait for animation
+      setTimeout(() => { chatWindow.style.display = 'none'; }, 300);
     } else {
       chatWindow.style.display = 'flex';
-      // Small delay to allow display:flex to apply before adding active class for animation
       setTimeout(() => { chatWindow.classList.add('active'); }, 10);
-      // Focus input when opened
       setTimeout(() => document.getElementById('chatInput').focus(), 100);
     }
   }
@@ -1325,9 +1324,18 @@ async function sendMessage() {
 
   // 3. Send to Backend API
   try {
-    const response = await fetch(`${API_BASE}/api/chat`, {
+    // Prepare Headers
+    const headers = { 'Content-Type': 'application/json' };
+    
+    // Add API Key if configured (Matches your .env API_CHAT_KEY)
+    if (CHAT_API_KEY && CHAT_API_KEY !== 'my-super-secret-chat-key-123') {
+        headers['Authorization'] = `Bearer ${CHAT_API_KEY}`;
+    }
+
+    // Updated to v1 endpoint
+    const response = await fetch(`${API_BASE}/api/v1/chat`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: headers,
       body: JSON.stringify({
         message: message,
         history: chatHistory
@@ -1345,7 +1353,7 @@ async function sendMessage() {
     botDiv.textContent = data.reply || "Sorry, I couldn't process that.";
     container.appendChild(botDiv);
     
-    // Update History (Keep last 6 messages: 3 pairs)
+    // Update History
     chatHistory.push({ role: "user", content: message });
     chatHistory.push({ role: "assistant", content: data.reply });
     if (chatHistory.length > 6) chatHistory = chatHistory.slice(-6);
@@ -1439,12 +1447,12 @@ var blogs = [
   {
     title: "The Importance of NFPA Compliance",
     desc: "Why adhering to National Fire Protection Association standards is critical for industrial safety in Kampala.",
-    icon: ""
+    icon: "🔥"
   },
   {
     title: "Power Stability: Generators vs. UPS",
     desc: "Understanding the right backup power solution for your specific business needs to prevent data loss.",
-    icon: ""
+    icon: "⚡"
   }
 ];
 
@@ -1465,7 +1473,8 @@ function renderProjects() {
   if (homeContainer) {
     homeContainer.innerHTML = '';
     projects.slice(0, 2).forEach(function(p) {
-      var card = document.createElement('div');      card.className = 'card project-card';
+      var card = document.createElement('div');      
+      card.className = 'card project-card';
       card.innerHTML = '<div class="card-img-wrapper"><img src="' + p.img + '" alt="' + p.title + '" class="card-img"></div><div class="card-body"><h3>' + p.title + '</h3><p style="color: var(--accent); font-weight: 700; margin-bottom: 0.5rem; font-size: 0.85rem;">' + p.location + '</p><p style="font-size: 0.85rem;">' + p.result + '</p><button class="read-more" onclick="openProject(\'' + p.id + '\')" style="background: none; border: none; color: var(--accent); font-weight: 700; cursor: pointer; margin-top: 1rem; font-size: 0.85rem;">VIEW CASE STUDY →</button></div>';
       homeContainer.appendChild(card);
     });
@@ -1517,11 +1526,11 @@ async function fetchWeather() {
   
   if (!weatherCards) return;
 
-  // Fetch real data from backend
+  // Fetch real data from backend (Updated to v1)
   for (let i = 0; i < cities.length; i++) {
     const city = cities[i];
     try {
-      const res = await fetch(`${API_BASE}/api/weather?city=${city}`);
+      const res = await fetch(`${API_BASE}/api/v1/weather?city=${city}`);
       const data = await res.json();
       
       if (weatherCards.children[i]) {
@@ -1590,7 +1599,8 @@ window.addEventListener('scroll', function() {
   var navbar = document.getElementById('navbar');
   if (navbar) {
     navbar.classList.toggle('scrolled', window.scrollY > 50);
-  }});
+  }
+});
 
 // Background slider
 var bgSlides = document.querySelectorAll('.bg-slide');
