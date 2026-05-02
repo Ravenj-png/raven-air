@@ -23,8 +23,20 @@ load_dotenv()
 
 # --- MONITORING & LOGGING ---
 SENTRY_DSN = os.environ.get('SENTRY_DSN')
-if SENTRY_DSN:
-    sentry_sdk.init(dsn=SENTRY_DSN, integrations=[FlaskIntegration()], traces_sample_rate=1.0)
+
+# Only initialize Sentry if a valid DSN is provided
+if SENTRY_DSN and SENTRY_DSN.startswith('https://'):
+    try:
+        sentry_sdk.init(
+            dsn=SENTRY_DSN, 
+            integrations=[FlaskIntegration()], 
+            traces_sample_rate=1.0
+        )
+        logger.info("✅ Sentry Initialized")
+    except Exception as e:
+        logger.warning(f"⚠️ Failed to initialize Sentry: {e}")
+else:
+    logger.warning("⚠️ Sentry DSN not found or invalid. Monitoring disabled.")
 
 class JsonFormatter(logging.Formatter):
     def format(self, record):
@@ -41,7 +53,6 @@ handler.setFormatter(JsonFormatter())
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logger.addHandler(handler)
-
 # --- APP CONFIG ---
 app = Flask(__name__)
 
