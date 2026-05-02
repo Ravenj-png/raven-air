@@ -11,7 +11,8 @@ from flask_talisman import Talisman
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
-from pydantic import BaseModel, EmailStr, field_validator
+# Updated Import for Pydantic v1
+from pydantic import BaseModel, EmailStr, validator
 from tenacity import retry, stop_after_attempt, wait_exponential
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
@@ -113,21 +114,24 @@ class ContactSubmission(db.Model):
     message = db.Column(db.Text, nullable=False)
     ip_address = db.Column(db.String(45))
 
-# Validation Models
+# Validation Models (Updated for Pydantic v1)
 class ContactSchema(BaseModel):
     name: str
     email: EmailStr
-    phone: str | None = None
-    service_type: str | None = "General Inquiry"
+    phone: str = None
+    service_type: str = "General Inquiry"
     message: str
     recaptcha_token: str
 
-    @field_validator('name')
+    class Config:
+        arbitrary_types_allowed = True
+
+    @validator('name')
     def name_not_empty(cls, v):
         if len(v) < 2: raise ValueError('Name too short')
         return v
 
-    @field_validator('message')
+    @validator('message')
     def message_valid(cls, v):
         if len(v) < 10 or len(v) > 5000: raise ValueError('Message length invalid')
         return v
@@ -135,6 +139,9 @@ class ContactSchema(BaseModel):
 class ChatSchema(BaseModel):
     message: str
     history: list = []
+
+    class Config:
+        arbitrary_types_allowed = True
 
 # Utils
 def sanitize_input(text):
