@@ -53,6 +53,7 @@ handler.setFormatter(JsonFormatter())
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logger.addHandler(handler)
+
 # --- APP CONFIG ---
 app = Flask(__name__)
 
