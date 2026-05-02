@@ -11,7 +11,7 @@ from flask_talisman import Talisman
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
-# Updated Import for Pydantic v1
+# Pydantic v1 imports
 from pydantic import BaseModel, EmailStr, validator
 from tenacity import retry, stop_after_attempt, wait_exponential
 import sentry_sdk
@@ -21,23 +21,7 @@ import redis
 # Load env vars
 load_dotenv()
 
-# --- MONITORING & LOGGING ---
-SENTRY_DSN = os.environ.get('SENTRY_DSN')
-
-# Only initialize Sentry if a valid DSN is provided
-if SENTRY_DSN and SENTRY_DSN.startswith('https://'):
-    try:
-        sentry_sdk.init(
-            dsn=SENTRY_DSN, 
-            integrations=[FlaskIntegration()], 
-            traces_sample_rate=1.0
-        )
-        logger.info("✅ Sentry Initialized")
-    except Exception as e:
-        logger.warning(f"⚠️ Failed to initialize Sentry: {e}")
-else:
-    logger.warning("⚠️ Sentry DSN not found or invalid. Monitoring disabled.")
-
+# ========== STEP 1: Create Logger FIRST (Before using it) ==========
 class JsonFormatter(logging.Formatter):
     def format(self, record):
         return json.dumps({
@@ -53,6 +37,17 @@ handler.setFormatter(JsonFormatter())
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logger.addHandler(handler)
+
+# ========== STEP 2: Initialize Sentry (Now logger exists) ==========
+SENTRY_DSN = os.environ.get('SENTRY_DSN')
+if SENTRY_DSN and SENTRY_DSN.startswith('https://'):
+    try:
+        sentry_sdk.init(dsn=SENTRY_DSN, integrations=[FlaskIntegration()], traces_sample_rate=1.0)
+        logger.info("✅ Sentry Initialized")
+    except Exception as e:
+        logger.warning(f"⚠️ Failed to initialize Sentry: {e}")
+else:
+    logger.warning("⚠️ Sentry DSN not found or invalid. Monitoring disabled.")
 
 # --- APP CONFIG ---
 app = Flask(__name__)
@@ -91,7 +86,7 @@ CSP_POLICY = {
     'script-src': ["'self'", "https://www.google.com", "https://www.gstatic.com", "https://unpkg.com"],
     'style-src': ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
     'img-src': ["'self'", "https:"],
-    'connect-src': ["'self'", "https://api.openweathermap.org", "https://api.x.ai"], 
+    'connect-src': ["'self'", "https://api.openweathermap.org", "https://api.x.ai"],
 }
 Talisman(app, force_https=True, content_security_policy=CSP_POLICY)
 
@@ -126,7 +121,7 @@ class ContactSubmission(db.Model):
     message = db.Column(db.Text, nullable=False)
     ip_address = db.Column(db.String(45))
 
-# Validation Models (Updated for Pydantic v1)
+# Validation Models (Pydantic v1)
 class ContactSchema(BaseModel):
     name: str
     email: EmailStr
@@ -180,7 +175,7 @@ def send_email_async(sub):
         msg['To'] = os.environ.get('ADMIN_EMAIL')
         msg['Reply-To'] = sub.email
         msg.attach(MIMEText(f"Name: {sub.name}\nEmail: {sub.email}\nMessage:\n{sub.message}", 'plain'))
-        
+
         smtp_user = os.environ.get('SMTP_USER')
         smtp_pass = os.environ.get('SMTP_PASS')
         if smtp_user and smtp_pass:
@@ -218,7 +213,7 @@ def require_csrf_fallback(f):
         csrf_token = request.headers.get('X-CSRF-Token')
         if not csrf_token:
             return jsonify({'error': 'CSRF Token Missing'}), 403
-        
+
         if USE_REDIS:
             try:
                 stored_token = r.get(f"csrf:{csrf_token}")
@@ -235,7 +230,7 @@ def require_csrf_fallback(f):
                 jwt.decode(csrf_token, app.config['SECRET_KEY'], algorithms=['HS256'])
             except Exception:
                 return jsonify({'error': 'Invalid CSRF Token'}), 403
-            
+
         return f(*args, **kwargs)
     return decorated_function
 
@@ -244,7 +239,7 @@ def require_csrf_fallback(f):
 @app.route('/api/v1/health')
 def health():
     return jsonify({
-        'status': 'healthy', 
+        'status': 'healthy',
         'redis_connected': USE_REDIS,
         'rate_limit_storage': limiter_storage
     })
@@ -252,13 +247,13 @@ def health():
 @app.route('/api/v1/csrf-token', methods=['GET'])
 def get_csrf_token():
     token = jwt.encode({'exp': datetime.utcnow() + timedelta(hours=1), 'jti': str(time.time())}, app.config['SECRET_KEY'], algorithm='HS256')
-    
+
     if USE_REDIS:
         try:
             r.setex(f"csrf:{token}", 3600, "valid")
         except Exception as e:
             logger.warning(f"Failed to store CSRF in Redis: {e}")
-    
+
     resp = make_response(jsonify({'csrf_token': token}))
     return resp
 
@@ -317,13 +312,13 @@ def submit_contact():
         message=sanitize_input(data.message),
         ip_address=request.remote_addr
     )
-    
+
     db.session.add(sub)
     db.session.commit()
-    
+
     thread = threading.Thread(target=send_email_async, args=(sub,))
     thread.start()
-    
+
     return jsonify({'success': True, 'reference': f"ASC-{sub.id}"}), 201
 
 @app.route('/api/v1/counseling', methods=['POST'])
@@ -331,9 +326,10 @@ def submit_contact():
 @limiter.limit("3 per minute")
 def submit_counseling():
     data = request.get_json()
-    if not data: return jsonify({'error': 'No data'}), 400
+    if not data:
+        return jsonify({'error': 'No data'}), 400
     if not data.get('email') or not data.get('message'): return jsonify({'error': 'Missing fields'}), 400
-        
+
     sub = ContactSubmission(
         name=sanitize_input(data.get('name')),
         email=data.get('email').lower(),
@@ -342,13 +338,13 @@ def submit_counseling():
         message=sanitize_input(data.get('message')),
         ip_address=request.remote_addr
     )
-    
+
     db.session.add(sub)
     db.session.commit()
-    
+
     thread = threading.Thread(target=send_email_async, args=(sub,))
     thread.start()
-    
+
     return jsonify({'success': True, 'reference': f"CNS-{sub.id}"}), 201
 
 @app.errorhandler(Exception)
