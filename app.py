@@ -13,7 +13,10 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
 # Pydantic v1 imports
-from pydantic import BaseModel, EmailStr, validator
+# ... (imports at the top) ...
+# Update this line to include Field
+from pydantic import BaseModel, EmailStr, validator, Field
+from typing import Optional 
 from tenacity import retry, stop_after_attempt, wait_exponential
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
@@ -88,7 +91,7 @@ CSP_POLICY = {
     'script-src': ["'self'", "https://www.google.com", "https://www.gstatic.com", "https://unpkg.com"],
     'style-src': ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
     'img-src': ["'self'", "https:"],
-    'connect-src': ["'self'", "https://api.openweathermap.org", "https://api.x.ai"], 
+    'connect-src': ["'self'", "https://api.openweathermap.org", "https://api.x.ai"],
 }
 Talisman(app, force_https=True, content_security_policy=CSP_POLICY)
 
@@ -123,11 +126,12 @@ class ContactSubmission(db.Model):
     message = db.Column(db.Text, nullable=False)
     ip_address = db.Column(db.String(45))
 
-# Validation Models (Fixed for Pydantic v1 Type Inference)
+# Validation Models (Fixed for Pydantic v1 Type Inference using Field)
 class ContactSchema(BaseModel):
     name: str
     email: EmailStr
-    phone: Optional[str] = None # Explicitly defined as Optional
+    # Use Field to explicitly set default to None, bypassing inference issues
+    phone: Optional[str] = Field(None, description="User phone number")
     service_type: str = "General Inquiry"
     message: str
     recaptcha_token: str
@@ -151,7 +155,6 @@ class ChatSchema(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
-
 # Utils
 def sanitize_input(text):
     if not text: return ""
@@ -177,7 +180,7 @@ def send_email_async(sub):
         msg['To'] = os.environ.get('ADMIN_EMAIL')
         msg['Reply-To'] = sub.email
         msg.attach(MIMEText(f"Name: {sub.name}\nEmail: {sub.email}\nMessage:\n{sub.message}", 'plain'))
-        
+
         smtp_user = os.environ.get('SMTP_USER')
         smtp_pass = os.environ.get('SMTP_PASS')
         if smtp_user and smtp_pass:
@@ -215,7 +218,7 @@ def require_csrf_fallback(f):
         csrf_token = request.headers.get('X-CSRF-Token')
         if not csrf_token:
             return jsonify({'error': 'CSRF Token Missing'}), 403
-        
+
         if USE_REDIS:
             try:
                 stored_token = r.get(f"csrf:{csrf_token}")
@@ -232,7 +235,7 @@ def require_csrf_fallback(f):
                 jwt.decode(csrf_token, app.config['SECRET_KEY'], algorithms=['HS256'])
             except Exception:
                 return jsonify({'error': 'Invalid CSRF Token'}), 403
-            
+
         return f(*args, **kwargs)
     return decorated_function
 
@@ -241,7 +244,7 @@ def require_csrf_fallback(f):
 @app.route('/api/v1/health')
 def health():
     return jsonify({
-        'status': 'healthy', 
+        'status': 'healthy',
         'redis_connected': USE_REDIS,
         'rate_limit_storage': limiter_storage
     })
@@ -249,13 +252,13 @@ def health():
 @app.route('/api/v1/csrf-token', methods=['GET'])
 def get_csrf_token():
     token = jwt.encode({'exp': datetime.utcnow() + timedelta(hours=1), 'jti': str(time.time())}, app.config['SECRET_KEY'], algorithm='HS256')
-    
+
     if USE_REDIS:
         try:
             r.setex(f"csrf:{token}", 3600, "valid")
         except Exception as e:
             logger.warning(f"Failed to store CSRF in Redis: {e}")
-    
+
     resp = make_response(jsonify({'csrf_token': token}))
     return resp
 
@@ -314,13 +317,13 @@ def submit_contact():
         message=sanitize_input(data.message),
         ip_address=request.remote_addr
     )
-    
+
     db.session.add(sub)
     db.session.commit()
-    
+
     thread = threading.Thread(target=send_email_async, args=(sub,))
     thread.start()
-    
+
     return jsonify({'success': True, 'reference': f"ASC-{sub.id}"}), 201
 
 @app.route('/api/v1/counseling', methods=['POST'])
@@ -331,7 +334,7 @@ def submit_counseling():
     if not  data:
         return jsonify({'error': 'No data'}), 400
     if not data.get('email') or not data.get('message'): return jsonify({'error': 'Missing fields'}), 400
-        
+
     sub = ContactSubmission(
         name=sanitize_input(data.get('name')),
         email=data.get('email').lower(),
@@ -340,13 +343,13 @@ def submit_counseling():
         message=sanitize_input(data.get('message')),
         ip_address=request.remote_addr
     )
-    
+
     db.session.add(sub)
     db.session.commit()
-    
+
     thread = threading.Thread(target=send_email_async, args=(sub,))
     thread.start()
-    
+
     return jsonify({'success': True, 'reference': f"CNS-{sub.id}"}), 201
 
 @app.errorhandler(Exception)
