@@ -731,7 +731,7 @@
     </div>
   </section>
 
-  <section class="weather-section">
+  <section class="trusted-partners-section" style="padding: clamp(1.5rem, 4vw, 2rem) clamp(1rem, 3vw, 1rem); max-width: 1200px; margin: 2rem auto 0 auto; width: 95%;">
     <div class="section-header">
       <h2>Trusted Partners</h2>
       <p>Leading organizations we've collaborated with across Uganda</p>
@@ -756,7 +756,7 @@
         <p>Renewable energy generation facility requiring comprehensive electrical systems and fire protection.</p>        <span class="partner-sector">Energy & Power Generation</span>
       </div>
       <div class="partner-card">
-        <img src="https://sunrise.ug/images/800/2026/01/1767895627091_20260108_210410.jpg.web" alt="Electoral Printery" class="partner-logo">
+        <img src="/static/WhatsApp Image 2026-05-15 at 01.20.33 (2).jpeg" alt="Electoral Printery" class="partner-logo">
         <h3>Electoral Commission Printery</h3>
         <p>Government printing facility requiring secure climate control and reliable power distribution.</p>
         <span class="partner-sector">Public Sector Partners</span>
@@ -851,7 +851,7 @@
     <div class="cards-grid" style="margin-bottom: 3rem;">
       <div class="card">
         <div class="card-img-wrapper">
-          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS3g1N2-KPLvqwevGPBZGf4iJE4VtmjYh3svG46Ktnr6lZ-QT1jBXHpE2P0&s=10" alt="HVAC" class="card-img">
+          <img src="/static/hvac air conditioning.jpeg" alt="HVAC" class="card-img">
         </div>
         <div class="card-body">
           <h3 style="color: var(--accent);">HVAC</h3>
@@ -929,7 +929,7 @@
     <div class="cards-grid">
       <div class="card" onclick="openConsultancyModal()">
         <div class="card-img-wrapper">
-          <img src="https://explorerdubailtd.com/uganda/wp-content/uploads/sites/22/2025/08/diverse-team-recondition-condenser-scaled.jpg" alt="HVAC Consulting" class="card-img">
+          <img src="https://images.unsplash.com/photo-1556761175-4b46a572b786?w=800&auto=format" alt="HVAC Consulting" class="card-img">
         </div>
         <div class="card-body">
           <h3 style="color: var(--accent);">HVAC System Selection</h3>
@@ -1051,17 +1051,15 @@
 </a>
 
 
-  
-  <div class="chatbot-header">
-  <h3>🤖 AI Assistant</h3>
-  <div class="chatbot-controls">
-    <button class="chatbot-minimize" onclick="toggleChatbot()">−</button>
-    <button class="chatbot-close" onclick="toggleChatbot()">✕</button>
-  </div>
-</div>
-    
-    
-    
+  <div class="chatbot-widget">
+  <div class="chatbot-window" id="chatbotWindow">
+    <div class="chatbot-header">
+      <h3>🤖 AI Assistant</h3>
+      <div class="chatbot-controls">
+        <button class="chatbot-minimize" onclick="toggleChatbot()">−</button>
+        <button class="chatbot-close" onclick="toggleChatbot()">✕</button>
+      </div>
+    </div>
     <div class="chatbot-messages" id="chatMessages">
       <div class="chat-message bot">Hello! I'm your AI assistant for Air System Coolers. How can I help you today?</div>
     </div>
@@ -1447,7 +1445,7 @@ var blogs = [
   {
     title: "Maximizing HVAC Efficiency in Uganda's Climate",
     desc: "How proper insulation and VRF systems can reduce your energy bills by up to 40% in tropical climates.",
-    icon: "❄️"
+    icon: "/static/maxjpeg"
   },
   {
     title: "The Importance of NFPA Compliance",
@@ -1457,7 +1455,7 @@ var blogs = [
   {
     title: "Power Stability: Generators vs. UPS",
     desc: "Understanding the right backup power solution for your specific business needs to prevent data loss.",
-    icon: "⚡"
+    icon: "/static/powerjpeg"
   }
 ];
 
@@ -1494,7 +1492,7 @@ function renderBlogs() {
     blogs.forEach(function(b) {
       var card = document.createElement('div');
       card.className = 'card';
-      card.innerHTML = '<div class="card-body"><div style="font-size: 2rem; margin-bottom: 1rem;">' + b.icon + '</div><h3>' + b.title + '</h3><p>' + b.desc + '</p></div>';
+      card.innerHTML = '<div class="card-body"><div style="font-size: 2rem; margin-bottom: 1rem;"><img src="' + b.icon + '" style="width: 50px; height: 50px; object-fit: cover;"></div><h3>' + b.title + '</h3><p>' + b.desc + '</p></div>';
       container.appendChild(card);
     });
   });
