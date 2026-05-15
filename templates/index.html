@@ -402,7 +402,6 @@
       flex-direction: column;
       box-shadow: 0 0 20px rgba(0,0,0,0.2);
     }
-    /* Mobile Chatbot Full Screen */
     @media (max-width: 600px) {
       .chatbot-window {
         width: 100%;
@@ -788,16 +787,13 @@
     </div>
   </section>
 
-  <!-- TECHNICAL INSIGHTS SECTION ADDED HERE -->
   <section style="background: #f8fafc;">
     <div class="section-header">
       <h2>Technical Insights</h2>
       <p>Expert advice on HVAC efficiency and safety standards in Uganda</p>
       <div class="line"></div>
     </div>
-    <div class="cards-grid" id="blogGrid">
-      <!-- Blog cards injected via JS -->
-    </div>
+    <div class="cards-grid" id="blogGrid"></div>
   </section>
 
   <div class="cta-section">
@@ -972,6 +968,7 @@
     <div class="cards-grid" id="projectsGrid"></div>
   </section>
 </div>
+
 <!-- CONTACT PAGE -->
 <div id="contactPage" class="page">
   <div class="section-header">
@@ -1050,7 +1047,6 @@
   <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
 </a>
 
-
 <div class="chatbot-widget">
   <div class="chatbot-window" id="chatbotWindow">
     <div class="chatbot-header">
@@ -1121,16 +1117,10 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 <script>
-// ==========================================
-// BACKEND API CONFIGURATION
-// ==========================================
 const API_BASE = 'https://raven-air.onrender.com'; 
 const CHAT_API_KEY = 'my-super-secret-chat-key-123'; 
-
-// ==========================================
-// CSRF & API UTILITIES
-// ==========================================
 let csrfToken = null;
+let chatHistory = []; 
 
 async function fetchCsrfToken() {
   try {
@@ -1164,28 +1154,16 @@ async function getRecaptchaToken(action) {
 
 async function submitForm(endpoint, formData, action) {
   const recaptchaToken = await getRecaptchaToken(action);
-  
-  const payload = {
-    ...formData,
-    recaptcha_token: recaptchaToken
-  };
-  
+  const payload = { ...formData, recaptcha_token: recaptchaToken };
   const response = await fetch(`${API_BASE}${endpoint}`, {
     method: 'POST',
     credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRF-Token': csrfToken || ''
-    },
+    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken || '' },
     body: JSON.stringify(payload)
   });
-  
   return await response.json();
 }
 
-// ==========================================
-// FORM HANDLERS
-// ==========================================
 function showFormMessage(formId, message, isSuccess) {
   const statusEl = document.getElementById(formId === 'contactForm' ? 'formStatus' : 'consultancyStatus');
   if (statusEl) {
@@ -1209,75 +1187,47 @@ function setLoading(button, isLoading) {
 
 function handleFormSubmit(event) {
   event.preventDefault();
-  
   const form = event.target;
   const submitBtn = form.querySelector('button[type="submit"]');
   const endpoint = form.dataset.endpoint;
   const action = form.dataset.action;
-  
   const formData = {};
-  new FormData(form).forEach((value, key) => {
-    formData[key] = value.trim();
-  });
-  
+  new FormData(form).forEach((value, key) => { formData[key] = value.trim(); });
   setLoading(submitBtn, true);  
   submitForm(endpoint, formData, action)
     .then(response => {
       if (response.success) {
         showFormMessage(form.id, response.message, true);
         form.reset();
-        if (response.reference) {
-          showFormMessage(form.id, `${response.message} Ref: ${response.reference}`, true);
-        }
+        if (response.reference) showFormMessage(form.id, `${response.message} Ref: ${response.reference}`, true);
       } else {
-        showFormMessage(form.id, response.error || 'Submission failed. please try again.', false);
+        showFormMessage(form.id, response.error || 'Submission failed. Please try again.', false);
       }
     })
     .catch(error => {
       console.error('Form submission error:', error);
       showFormMessage(form.id, 'Network error. Please check your connection and try again.', false);
     })
-    .finally(() => {
-      setLoading(submitBtn, false);
-    });
+    .finally(() => setLoading(submitBtn, false));
 }
 
-// ==========================================
-// NAVIGATION
-// ==========================================
 function showPage(pageId) {
-  document.querySelectorAll('.page').forEach(function(p) {
+  document.querySelectorAll('.page').forEach(p => {
     p.classList.remove('active-page');
     p.style.display = 'none';
   });
-  
   var page = document.getElementById(pageId + 'Page');
   if (page) {
     page.style.display = 'block';
-    setTimeout(function() {
-      page.classList.add('active-page');
-    }, 10);
-    
-    document.querySelectorAll('.nav-btn').forEach(function(btn) {
-      btn.classList.remove('active-page-btn');
-    });
+    setTimeout(() => page.classList.add('active-page'), 10);
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active-page-btn'));
     var activeBtn = document.querySelector('.nav-btn[data-page="' + pageId + '"]');
     if (activeBtn) activeBtn.classList.add('active-page-btn');
-    
     window.scrollTo(0, 0);
   }
 }
 
-document.querySelectorAll('.nav-btn').forEach(function(btn) {  
-  btn.addEventListener('click', function() {
-    showPage(this.dataset.page);
-  });
-});
-
-// ==========================================
-// CHATBOT LOGIC WITH WORKING MINIMIZE/CLOSE
-// ==========================================
-let chatHistory = []; 
+document.querySelectorAll('.nav-btn').forEach(btn => btn.addEventListener('click', () => showPage(btn.dataset.page)));
 
 function toggleChatbot() {
   var chatWindow = document.getElementById('chatbotWindow');
@@ -1309,61 +1259,40 @@ function closeChatbot() {
   }
 }
 
-function handleChatKeypress(event) {
-  if (event.key === 'Enter') sendMessage();
-}
+function handleChatKeypress(event) { if (event.key === 'Enter') sendMessage(); }
 
 async function sendMessage() {
   var input = document.getElementById('chatInput');
   var message = input.value.trim();
   if (!message) return;
-  
   var container = document.getElementById('chatMessages');
-  
   var userDiv = document.createElement('div');
   userDiv.className = 'chat-message user';
   userDiv.textContent = message;
   container.appendChild(userDiv);
-  
   input.value = '';
   container.scrollTop = container.scrollHeight;
-  
   var loadingDiv = document.createElement('div');
   loadingDiv.className = 'chat-message bot';
   loadingDiv.textContent = 'Typing...';
   loadingDiv.id = 'loadingMsg';
   container.appendChild(loadingDiv);
   container.scrollTop = container.scrollHeight;
-
   try {
     const headers = { 'Content-Type': 'application/json' };
-    
-    if (CHAT_API_KEY && CHAT_API_KEY !== 'my-super-secret-chat-key-123') {
-        headers['Authorization'] = `Bearer ${CHAT_API_KEY}`;
-    }
-
+    if (CHAT_API_KEY && CHAT_API_KEY !== 'my-super-secret-chat-key-123') headers['Authorization'] = `Bearer ${CHAT_API_KEY}`;
     const response = await fetch(`${API_BASE}/api/v1/chat`, {
-      method: 'POST',
-      headers: headers,
-      body: JSON.stringify({
-        message: message,
-        history: chatHistory
-      })
+      method: 'POST', headers: headers, body: JSON.stringify({ message: message, history: chatHistory })
     });
-
     const data = await response.json();
-    
     document.getElementById('loadingMsg').remove();
-
     var botDiv = document.createElement('div');
     botDiv.className = 'chat-message bot';
     botDiv.textContent = data.reply || "Sorry, I couldn't process that.";
     container.appendChild(botDiv);
-    
     chatHistory.push({ role: "user", content: message });
     chatHistory.push({ role: "assistant", content: data.reply });
     if (chatHistory.length > 6) chatHistory = chatHistory.slice(-6);
-
   } catch (error) {
     document.getElementById('loadingMsg').remove();
     var errorDiv = document.createElement('div');
@@ -1372,114 +1301,48 @@ async function sendMessage() {
     container.appendChild(errorDiv);
     console.error('Chat error:', error);
   }
-  
   container.scrollTop = container.scrollHeight;
 }
 
-// ==========================================
-// MODALS
-// ==========================================
 function openCertModal(title, subtitle, desc) {  
   document.getElementById('certTitle').innerText = title;
   document.getElementById('certSubtitle').innerText = subtitle;
   document.getElementById('certDesc').innerText = desc;
   document.getElementById('certModal').style.display = 'flex';
 }
+function closeCertModal() { document.getElementById('certModal').style.display = 'none'; }
+function openConsultancyModal() { document.getElementById('consultancyModal').style.display = 'flex'; }
+function closeConsultancyModal() { document.getElementById('consultancyModal').style.display = 'none'; }
+function closeProjectModal() { document.getElementById('projectModal').style.display = 'none'; }
 
-function closeCertModal() {
-  document.getElementById('certModal').style.display = 'none';
-}
-
-function openConsultancyModal() {
-  document.getElementById('consultancyModal').style.display = 'flex';
-}
-
-function closeConsultancyModal() {
-  document.getElementById('consultancyModal').style.display = 'none';
-}
-
-function closeProjectModal() {
-  document.getElementById('projectModal').style.display = 'none';
-}
-
-// ==========================================
-// PROJECTS DATA & RENDER
-// ==========================================
 var projects = [
-  { 
-    id: 'p1', 
-    title: 'Agago Hydro Power', 
-    location: 'Agago, Uganda', 
-    img: 'https://media.licdn.com/dms/image/v2/D4D22AQH1yT5fxATolg/feedshare-shrink_800/feedshare-shrink_800/0/1700744447242?e=2147483647&v=beta&t=LB2SvCrEGpb607uijKhLuT_57WFX78yE6LYcyVgXhbI', 
-    problem: 'Critical overheating in turbine control rooms causing system shutdowns.', 
-    solution: 'Installed precision VRF cooling system with redundant backup units.', 
-    result: '35% energy reduction and 100% uptime since installation.' 
-  },
-  { 
-    id: 'p2', 
-    title: 'CCCC Project', 
-    location: 'Nsambya, Kampala', 
-    img: 'https://www.developmentaid.org/files/organizationLogos/china-communications-construction-co-limited-441890.jpg', 
-    problem: 'Outdated fire protection systems failing modern safety audits.', 
-    solution: 'Complete retrofit of sprinkler network and intelligent alarm integration.', 
-    result: 'Fully NFPA compliant certification achieved within 2 weeks.' 
-  },
-  { 
-    id: 'p3', 
-    title: 'Industrial Area Factory', 
-    location: 'Industrial Area, Kampala', 
-    img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRqpli5VlK8VhcC1Mle9rFjEKgYW_Qh8heBAm1pVOzXZ7K-p4bv3OGFj2qu&s=10', 
-    problem: 'Frequent power outages disrupting production lines.', 
-    solution: 'Installation of 500kVA standby generator with automatic transfer switch.', 
-    result: '99.9% operational uptime and zero production loss during grid failures.' 
-  },
-  { 
-    id: 'p4', 
-    title: 'Jinja Manufacturing', 
-    location: 'Jinja, Uganda', 
-    img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQGU7hUrnYplW7gEs8AglR8wVFfBFmpTIiAtuyUC4074ZNlNrsfW34oFONy&s=10', 
-    problem: 'Poor air quality and heat buildup affecting worker productivity.', 
-    solution: 'Industrial exhaust system with heat recovery ventilation.', 
-    result: '20% increase in productivity and improved indoor air quality metrics.' 
-  }
+  { id: 'p1', title: 'Agago Hydro Power', location: 'Agago, Uganda', img: 'https://media.licdn.com/dms/image/v2/D4D22AQH1yT5fxATolg/feedshare-shrink_800/feedshare-shrink_800/0/1700744447242?e=2147483647&v=beta&t=LB2SvCrEGpb607uijKhLuT_57WFX78yE6LYcyVgXhbI', problem: 'Critical overheating in turbine control rooms causing system shutdowns.', solution: 'Installed precision VRF cooling system with redundant backup units.', result: '35% energy reduction and 100% uptime since installation.' },
+  { id: 'p2', title: 'CCCC Project', location: 'Nsambya, Kampala', img: 'https://www.developmentaid.org/files/organizationLogos/china-communications-construction-co-limited-441890.jpg', problem: 'Outdated fire protection systems failing modern safety audits.', solution: 'Complete retrofit of sprinkler network and intelligent alarm integration.', result: 'Fully NFPA compliant certification achieved within 2 weeks.' },
+  { id: 'p3', title: 'Industrial Area Factory', location: 'Industrial Area, Kampala', img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRqpli5VlK8VhcC1Mle9rFjEKgYW_Qh8heBAm1pVOzXZ7K-p4bv3OGFj2qu&s=10', problem: 'Frequent power outages disrupting production lines.', solution: 'Installation of 500kVA standby generator with automatic transfer switch.', result: '99.9% operational uptime and zero production loss during grid failures.' },
+  { id: 'p4', title: 'Jinja Manufacturing', location: 'Jinja, Uganda', img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQGU7hUrnYplW7gEs8AglR8wVFfBFmpTIiAtuyUC4074ZNlNrsfW34oFONy&s=10', problem: 'Poor air quality and heat buildup affecting worker productivity.', solution: 'Industrial exhaust system with heat recovery ventilation.', result: '20% increase in productivity and improved indoor air quality metrics.' }
 ];
 
 var blogs = [
-  {
-    title: "Maximizing HVAC Efficiency in Uganda's Climate",
-    desc: "How proper insulation and VRF systems can reduce your energy bills by up to 40% in tropical climates.",
-    icon: "/static/max.jpeg"
-  },
-  {
-    title: "The Importance of NFPA Compliance",
-    desc: "Why adhering to National Fire Protection Association standards is critical for industrial safety in Kampala.",
-    icon: "🔥"
-  },
-  {
-    title: "Power Stability: Generators vs. UPS",
-    desc: "Understanding the right backup power solution for your specific business needs to prevent data loss.",
-    icon: "/static/power.jpeg"
-  }
+  { title: "Maximizing HVAC Efficiency in Uganda's Climate", desc: "How proper insulation and VRF systems can reduce your energy bills by up to 40% in tropical climates.", icon: "/static/max.jpeg" },
+  { title: "The Importance of NFPA Compliance", desc: "Why adhering to National Fire Protection Association standards is critical for industrial safety in Kampala.", icon: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRgbWg2ioMa-Oj-19A-VSaCtNP9rfrBW_HsuWFNrWRPm5RUb78oIp1C95Ri&s=10" },
+  { title: "Power Stability: Generators vs. UPS", desc: "Understanding the right backup power solution for your specific business needs to prevent data loss.", icon: "/static/power.jpeg" }
 ];
 
 function renderProjects() {
   var container = document.getElementById('projectsGrid');
   var homeContainer = document.getElementById('homeProjectsGrid');
-  
   if (!container) return;
   container.innerHTML = '';
-  
-  projects.forEach(function(p) {
+  projects.forEach(p => {
     var card = document.createElement('div');
     card.className = 'card project-card';
     card.innerHTML = '<div class="card-img-wrapper"><img src="' + p.img + '" alt="' + p.title + '" class="card-img"></div><div class="card-body"><h3>' + p.title + '</h3><p style="color: var(--accent); font-weight: 700; margin-bottom: 0.5rem; font-size: 0.85rem;">' + p.location + '</p><p style="font-size: 0.85rem;">' + p.problem.substring(0, 60) + '...</p><button class="read-more" onclick="openProject(\'' + p.id + '\')" style="background: none; border: none; color: var(--accent); font-weight: 700; cursor: pointer; margin-top: 1rem; font-size: 0.85rem;">VIEW CASE STUDY →</button></div>';
     container.appendChild(card);
   });
-
   if (homeContainer) {
     homeContainer.innerHTML = '';
-    projects.slice(0, 2).forEach(function(p) {
-      var card = document.createElement('div');      
+    projects.slice(0, 2).forEach(p => {
+      var card = document.createElement('div');
       card.className = 'card project-card';
       card.innerHTML = '<div class="card-img-wrapper"><img src="' + p.img + '" alt="' + p.title + '" class="card-img"></div><div class="card-body"><h3>' + p.title + '</h3><p style="color: var(--accent); font-weight: 700; margin-bottom: 0.5rem; font-size: 0.85rem;">' + p.location + '</p><p style="font-size: 0.85rem;">' + p.result + '</p><button class="read-more" onclick="openProject(\'' + p.id + '\')" style="background: none; border: none; color: var(--accent); font-weight: 700; cursor: pointer; margin-top: 1rem; font-size: 0.85rem;">VIEW CASE STUDY →</button></div>';
       homeContainer.appendChild(card);
@@ -1489,26 +1352,21 @@ function renderProjects() {
 
 function renderBlogs() {
   var containers = document.querySelectorAll('#blogGrid');
-  containers.forEach(function(container) {
+  containers.forEach(container => {
     if(!container) return;
     container.innerHTML = '';
-    blogs.forEach(function(b) {
+    blogs.forEach(b => {
       var card = document.createElement('div');
       card.className = 'card';
-      if (b.icon === "🔥") {
-        card.innerHTML = '<div class="card-body"><div style="font-size: 2rem; margin-bottom: 1rem;">🔥</div><h3>' + b.title + '</h3><p>' + b.desc + '</p></div>';
-      } else {
-        card.innerHTML = '<div class="card-body"><div style="margin-bottom: 1rem;"><img src="' + b.icon + '" style="width: 50px; height: 50px; object-fit: cover;"></div><h3>' + b.title + '</h3><p>' + b.desc + '</p></div>';
-      }
+      card.innerHTML = '<div class="card-body"><div style="margin-bottom: 1rem;"><img src="' + b.icon + '" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;"></div><h3>' + b.title + '</h3><p>' + b.desc + '</p></div>';
       container.appendChild(card);
     });
   });
 }
 
 function openProject(id) {
-  var p = projects.find(function(proj) { return proj.id === id; });
+  var p = projects.find(proj => proj.id === id);
   if (!p) return;
-  
   document.getElementById('modalTitle').innerText = p.title;
   document.getElementById('modalLocation').innerText = p.location;
   document.getElementById('modalImg').src = p.img;
@@ -1516,76 +1374,46 @@ function openProject(id) {
   document.getElementById('projectModal').style.display = 'flex';
 }
 
-// ==========================================
-// MAP & WEATHER
-// ==========================================
 var map;
 function initMap() {
   if (!document.getElementById('map')) return;
   if (typeof L !== 'undefined') {
     map = L.map('map').setView([1.3733, 32.2903], 7);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors' }).addTo(map);
   }
 }
 
 async function fetchWeather() {
   const cities = ['Kampala', 'Jinja', 'Gulu', 'Mbarara'];
   const weatherCards = document.getElementById('weatherCards');
-  
   if (!weatherCards) return;
-
   for (let i = 0; i < cities.length; i++) {
     const city = cities[i];
     try {
       const res = await fetch(`${API_BASE}/api/v1/weather?city=${city}`);
       const data = await res.json();
-      
       if (weatherCards.children[i]) {
-        weatherCards.children[i].innerHTML = `
-          <div>
-            <h4>${city}</h4>
-            <p>${data.desc}</p>
-            <p style="font-size: 0.85rem; color: var(--accent);">Humidity: ${data.humidity}%</p>
-          </div>
-          <div class="weather-temp">${data.temp}°C</div>
-        `;
+        weatherCards.children[i].innerHTML = `<div><h4>${city}</h4><p>${data.desc}</p><p style="font-size: 0.85rem; color: var(--accent);">Humidity: ${data.humidity}%</p></div><div class="weather-temp">${data.temp}°C</div>`;
       }
-    } catch (e) {
-      console.error(`Weather fetch failed for ${city}`, e);
-    }
+    } catch (e) { console.error(`Weather fetch failed for ${city}`, e); }
   }
 }
 
 function requestLocation() {
   if ("geolocation" in navigator && map) {
-    navigator.geolocation.getCurrentPosition(
-      function(position) {
-        var latitude = position.coords.latitude;
-        var longitude = position.coords.longitude;
-        map.setView([latitude, longitude], 10);
-        L.marker([latitude, longitude]).addTo(map).bindPopup("<b>Your Location</b>").openPopup();
-      },
-      function(error) {
-        console.log("Location access denied or unavailable");
-      }
-    );
+    navigator.geolocation.getCurrentPosition(position => {
+      map.setView([position.coords.latitude, position.coords.longitude], 10);
+      L.marker([position.coords.latitude, position.coords.longitude]).addTo(map).bindPopup("<b>Your Location</b>").openPopup();
+    }, error => console.log("Location access denied or unavailable"));
   }
 }
 
-// ==========================================
-// EVENT LISTENERS & INIT
-// ==========================================
 document.addEventListener('DOMContentLoaded', async function() {
   const contactForm = document.getElementById('contactForm');
   const consultancyForm = document.getElementById('consultancyForm');
-  
   if (contactForm) contactForm.addEventListener('submit', handleFormSubmit);
   if (consultancyForm) consultancyForm.addEventListener('submit', handleFormSubmit);
-  
   await fetchCsrfToken();
-  
   renderProjects();
   renderBlogs();
   initMap();
@@ -1593,22 +1421,12 @@ document.addEventListener('DOMContentLoaded', async function() {
   requestLocation();
 });
 
-window.addEventListener('click', function(e) {
-  if (e.target.classList.contains('modal')) {
-    e.target.style.display = 'none';
-  }
-});
-
-window.addEventListener('scroll', function() {
-  var navbar = document.getElementById('navbar');
-  if (navbar) {
-    navbar.classList.toggle('scrolled', window.scrollY > 50);
-  }
-});
+window.addEventListener('click', e => { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; });
+window.addEventListener('scroll', () => { let navbar = document.getElementById('navbar'); if (navbar) navbar.classList.toggle('scrolled', window.scrollY > 50); });
 
 var bgSlides = document.querySelectorAll('.bg-slide');
 var bgCurr = 0;
-setInterval(function() {
+setInterval(() => {
   if (bgSlides.length < 3) return;
   bgSlides[bgCurr].classList.remove('active');
   bgCurr = (bgCurr + 1) % bgSlides.length;
