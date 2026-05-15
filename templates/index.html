@@ -202,7 +202,7 @@
       z-index: 10;
       box-shadow: var(--shadow-sm); 
       border-top: 4px solid var(--accent);
-      width: 95%; /* Slight margin on sides for mobile aesthetics */
+      width: 95%;
     }
     .trust-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; }
     .trust-item { text-align: center; padding: 0.8rem; border-right: 1px solid #eee; }
@@ -653,7 +653,7 @@
     </div>    <div class="cards-grid">
       <div class="card">
         <div class="card-img-wrapper">
-          <img src="https://www.lg.com/content/dam/channelbtb/lgcom/in/reference/migration/multi-i/img/banner-1.jpg" alt="HVAC" class="card-img">
+          <img src="/static/hvac air conditioning.jpeg" alt="HVAC" class="card-img">
           <span class="card-category">Mechanical</span>
         </div>
         <div class="card-body">
@@ -686,7 +686,7 @@
       </div>
       <div class="card" onclick="openConsultancyModal()">
         <div class="card-img-wrapper">
-          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRLERvbnmbxx50zqDEnp2sGoUFbNTUdeCWfJcLJbK584UdGAYXY62dwrvw&s=10" alt="Consultancy" class="card-img">
+          <img src="https://images.unsplash.com/photo-1556761175-4b46a572b786?w=800&auto=format" alt="Consultancy" class="card-img">
           <span class="card-category">Consulting</span>
         </div>
         <div class="card-body">
@@ -756,7 +756,7 @@
         <p>Renewable energy generation facility requiring comprehensive electrical systems and fire protection.</p>        <span class="partner-sector">Energy & Power Generation</span>
       </div>
       <div class="partner-card">
-        <img src="/static/WhatsApp Image 2026-05-15 at 01.20.33 (2).jpeg" alt="Electoral Printery" class="partner-logo">
+        <img src="https://media.cnn.com/api/v1/images/stellar/prod/c-2026-01-08t150558z-1970363091-rc2xwiazxvgr-rtrmadp-3-uganda-politics.jpg?c=original&q=w_860,c_fill" alt="Electoral Printery" class="partner-logo">
         <h3>Electoral Commission Printery</h3>
         <p>Government printing facility requiring secure climate control and reliable power distribution.</p>
         <span class="partner-sector">Public Sector Partners</span>
@@ -1051,13 +1051,13 @@
 </a>
 
 
-  <div class="chatbot-widget">
+<div class="chatbot-widget">
   <div class="chatbot-window" id="chatbotWindow">
     <div class="chatbot-header">
       <h3>🤖 AI Assistant</h3>
       <div class="chatbot-controls">
-        <button class="chatbot-minimize" onclick="toggleChatbot()">−</button>
-        <button class="chatbot-close" onclick="toggleChatbot()">✕</button>
+        <button class="chatbot-minimize" onclick="minimizeChatbot()">−</button>
+        <button class="chatbot-close" onclick="closeChatbot()">✕</button>
       </div>
     </div>
     <div class="chatbot-messages" id="chatMessages">
@@ -1125,7 +1125,6 @@
 // BACKEND API CONFIGURATION
 // ==========================================
 const API_BASE = 'https://raven-air.onrender.com'; 
-//  REPLACE THIS WITH THE KEY YOU PUT IN YOUR .env FILE (API_CHAT_KEY)
 const CHAT_API_KEY = 'my-super-secret-chat-key-123'; 
 
 // ==========================================
@@ -1135,7 +1134,6 @@ let csrfToken = null;
 
 async function fetchCsrfToken() {
   try {
-    // Updated to v1 endpoint
     const response = await fetch(`${API_BASE}/api/v1/csrf-token`, {
       method: 'GET',
       credentials: 'include',
@@ -1156,11 +1154,10 @@ async function getRecaptchaToken(action) {
   return new Promise((resolve) => {
     if (typeof grecaptcha !== 'undefined') {
       grecaptcha.ready(function() {
-        // REPLACE WITH YOUR ACTUAL SITE KEY FROM GOOGLE ADMIN CONSOLE
         grecaptcha.execute('YOUR_RECAPTCHA_SITE_KEY_HERE', { action: action }).then(resolve);
       });
     } else {
-      resolve('demo-token'); // Fallback for testing only
+      resolve('demo-token');
     }
   });
 }
@@ -1218,7 +1215,6 @@ function handleFormSubmit(event) {
   const endpoint = form.dataset.endpoint;
   const action = form.dataset.action;
   
-  // Collect form data
   const formData = {};
   new FormData(form).forEach((value, key) => {
     formData[key] = value.trim();
@@ -1234,7 +1230,7 @@ function handleFormSubmit(event) {
           showFormMessage(form.id, `${response.message} Ref: ${response.reference}`, true);
         }
       } else {
-        showFormMessage(form.id, response.error || 'Submission failed. Please try again.', false);
+        showFormMessage(form.id, response.error || 'Submission failed. please try again.', false);
       }
     })
     .catch(error => {
@@ -1279,7 +1275,7 @@ document.querySelectorAll('.nav-btn').forEach(function(btn) {
 });
 
 // ==========================================
-// CHATBOT LOGIC (CONNECTED TO GROK BACKEND)
+// CHATBOT LOGIC WITH WORKING MINIMIZE/CLOSE
 // ==========================================
 let chatHistory = []; 
 
@@ -1297,6 +1293,22 @@ function toggleChatbot() {
   }
 }
 
+function minimizeChatbot() {
+  var chatWindow = document.getElementById('chatbotWindow');
+  if (chatWindow) {
+    chatWindow.classList.remove('active');
+    setTimeout(() => { chatWindow.style.display = 'none'; }, 300);
+  }
+}
+
+function closeChatbot() {
+  var chatWindow = document.getElementById('chatbotWindow');
+  if (chatWindow) {
+    chatWindow.classList.remove('active');
+    chatWindow.style.display = 'none';
+  }
+}
+
 function handleChatKeypress(event) {
   if (event.key === 'Enter') sendMessage();
 }
@@ -1308,7 +1320,6 @@ async function sendMessage() {
   
   var container = document.getElementById('chatMessages');
   
-  // 1. Display User Message
   var userDiv = document.createElement('div');
   userDiv.className = 'chat-message user';
   userDiv.textContent = message;
@@ -1317,7 +1328,6 @@ async function sendMessage() {
   input.value = '';
   container.scrollTop = container.scrollHeight;
   
-  // 2. Show Loading Indicator
   var loadingDiv = document.createElement('div');
   loadingDiv.className = 'chat-message bot';
   loadingDiv.textContent = 'Typing...';
@@ -1325,17 +1335,13 @@ async function sendMessage() {
   container.appendChild(loadingDiv);
   container.scrollTop = container.scrollHeight;
 
-  // 3. Send to Backend API
   try {
-    // Prepare Headers
     const headers = { 'Content-Type': 'application/json' };
     
-    // Add API Key if configured (Matches your .env API_CHAT_KEY)
     if (CHAT_API_KEY && CHAT_API_KEY !== 'my-super-secret-chat-key-123') {
         headers['Authorization'] = `Bearer ${CHAT_API_KEY}`;
     }
 
-    // Updated to v1 endpoint
     const response = await fetch(`${API_BASE}/api/v1/chat`, {
       method: 'POST',
       headers: headers,
@@ -1347,16 +1353,13 @@ async function sendMessage() {
 
     const data = await response.json();
     
-    // Remove loading message
     document.getElementById('loadingMsg').remove();
 
-    // 4. Display Bot Response
     var botDiv = document.createElement('div');
     botDiv.className = 'chat-message bot';
     botDiv.textContent = data.reply || "Sorry, I couldn't process that.";
     container.appendChild(botDiv);
     
-    // Update History
     chatHistory.push({ role: "user", content: message });
     chatHistory.push({ role: "assistant", content: data.reply });
     if (chatHistory.length > 6) chatHistory = chatHistory.slice(-6);
@@ -1445,7 +1448,7 @@ var blogs = [
   {
     title: "Maximizing HVAC Efficiency in Uganda's Climate",
     desc: "How proper insulation and VRF systems can reduce your energy bills by up to 40% in tropical climates.",
-    icon: "/static/maxjpeg"
+    icon: "/static/max.jpeg"
   },
   {
     title: "The Importance of NFPA Compliance",
@@ -1455,7 +1458,7 @@ var blogs = [
   {
     title: "Power Stability: Generators vs. UPS",
     desc: "Understanding the right backup power solution for your specific business needs to prevent data loss.",
-    icon: "/static/powerjpeg"
+    icon: "/static/power.jpeg"
   }
 ];
 
@@ -1492,7 +1495,11 @@ function renderBlogs() {
     blogs.forEach(function(b) {
       var card = document.createElement('div');
       card.className = 'card';
-      card.innerHTML = '<div class="card-body"><div style="font-size: 2rem; margin-bottom: 1rem;"><img src="' + b.icon + '" style="width: 50px; height: 50px; object-fit: cover;"></div><h3>' + b.title + '</h3><p>' + b.desc + '</p></div>';
+      if (b.icon === "🔥") {
+        card.innerHTML = '<div class="card-body"><div style="font-size: 2rem; margin-bottom: 1rem;">🔥</div><h3>' + b.title + '</h3><p>' + b.desc + '</p></div>';
+      } else {
+        card.innerHTML = '<div class="card-body"><div style="margin-bottom: 1rem;"><img src="' + b.icon + '" style="width: 50px; height: 50px; object-fit: cover;"></div><h3>' + b.title + '</h3><p>' + b.desc + '</p></div>';
+      }
       container.appendChild(card);
     });
   });
@@ -1529,7 +1536,6 @@ async function fetchWeather() {
   
   if (!weatherCards) return;
 
-  // Fetch real data from backend (Updated to v1)
   for (let i = 0; i < cities.length; i++) {
     const city = cities[i];
     try {
@@ -1572,17 +1578,14 @@ function requestLocation() {
 // EVENT LISTENERS & INIT
 // ==========================================
 document.addEventListener('DOMContentLoaded', async function() {
-  // Initialize forms with backend integration
   const contactForm = document.getElementById('contactForm');
   const consultancyForm = document.getElementById('consultancyForm');
   
   if (contactForm) contactForm.addEventListener('submit', handleFormSubmit);
   if (consultancyForm) consultancyForm.addEventListener('submit', handleFormSubmit);
   
-  // Fetch CSRF token on load
   await fetchCsrfToken();
   
-  // Initialize other features
   renderProjects();
   renderBlogs();
   initMap();
@@ -1590,14 +1593,12 @@ document.addEventListener('DOMContentLoaded', async function() {
   requestLocation();
 });
 
-// Modal close handlers
 window.addEventListener('click', function(e) {
   if (e.target.classList.contains('modal')) {
     e.target.style.display = 'none';
   }
 });
 
-// Scroll nav effect
 window.addEventListener('scroll', function() {
   var navbar = document.getElementById('navbar');
   if (navbar) {
@@ -1605,7 +1606,6 @@ window.addEventListener('scroll', function() {
   }
 });
 
-// Background slider
 var bgSlides = document.querySelectorAll('.bg-slide');
 var bgCurr = 0;
 setInterval(function() {
