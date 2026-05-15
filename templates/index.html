@@ -393,63 +393,69 @@
     .chatbot-toggle:hover { transform: scale(1.1); animation: none; }
     .chatbot-window {
       position: fixed;
-      top: 0;      left: 0;
-      width: 100%;
-      height: 100%;
+      bottom: 100px;
+      right: 20px;
+      width: 350px;
+      height: 500px;
       background: white;
       z-index: 10000;
       display: none;
       flex-direction: column;
       box-shadow: 0 0 20px rgba(0,0,0,0.2);
+      border-radius: 16px;
+      overflow: hidden;
     }
     @media (max-width: 600px) {
       .chatbot-window {
-        width: 100%;
-        height: 100%;
-        border-radius: 0;
+        width: 90%;
+        height: 80%;
+        right: 5%;
+        bottom: 80px;
+        border-radius: 16px;
       }
     }
     .chatbot-window.active { display: flex; }
     .chatbot-header {
       background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
       color: white;
-      padding: 1.2rem;
+      padding: 1rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
-    .chatbot-header h3 { font-size: 1.2rem; font-weight: 700; }
-    .chatbot-controls { display: flex; gap: 10px; }
+    .chatbot-header h3 { font-size: 1.1rem; font-weight: 700; margin: 0; }
+    .chatbot-controls { display: flex; gap: 12px; }
     .chatbot-minimize, .chatbot-close {
       background: none;
       border: none;
       color: white;
-      font-size: 1.5rem;
+      font-size: 1.3rem;
       cursor: pointer;
       padding: 0;
       line-height: 1;
+      font-weight: bold;
     }
     .chatbot-messages {
       flex: 1;
       overflow-y: auto;
-      padding: 1.2rem;
+      padding: 1rem;
       background: #f8fafc;
     }
     .chat-message {
-      margin-bottom: 1.2rem;
-      padding: 1rem;
+      margin-bottom: 1rem;
+      padding: 0.8rem 1rem;
       border-radius: 12px;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       max-width: 85%;
-      line-height: 1.5;
+      line-height: 1.4;
       animation: slideIn 0.3s ease;
     }
     @keyframes slideIn {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    .chat-message.bot { background: white; border: 2px solid #e5e7eb; align-self: flex-start; border-bottom-left-radius: 4px; }
+    .chat-message.bot { background: white; border: 1px solid #e5e7eb; align-self: flex-start; border-bottom-left-radius: 4px; }
     .chat-message.user {
       background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
       color: white;      align-self: flex-end;
@@ -458,27 +464,28 @@
     }
     .chatbot-input {
       display: flex;
-      padding: 1.2rem;
-      border-top: 2px solid #e5e7eb;
+      padding: 1rem;
+      border-top: 1px solid #e5e7eb;
       background: white;
-      padding-bottom: calc(1.2rem + env(safe-area-inset-bottom));
+      gap: 8px;
     }
     .chatbot-input input {
       flex: 1;
       margin: 0;
-      border-radius: 8px 0 0 8px;
-      border: 2px solid #e5e7eb;
-      padding: 0.8rem;
-      font-size: 1rem;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      padding: 0.7rem;
+      font-size: 0.9rem;
     }
+    .chatbot-input input:focus { outline: none; border-color: var(--accent); }
     .chatbot-input button {
       background: var(--accent);
       color: white;
       border: none;
-      padding: 0 1.8rem;
-      border-radius: 0 8px 8px 0;
+      padding: 0 1.2rem;
+      border-radius: 8px;
       cursor: pointer;
-      font-weight: 700;
+      font-weight: 600;
       transition: background 0.3s;
     }
     .chatbot-input button:hover { background: var(--accent-dark); }
@@ -1052,8 +1059,8 @@
     <div class="chatbot-header">
       <h3>🤖 AI Assistant</h3>
       <div class="chatbot-controls">
-        <button class="chatbot-minimize" onclick="minimizeChatbot()">−</button>
-        <button class="chatbot-close" onclick="closeChatbot()">✕</button>
+        <button class="chatbot-minimize" id="minimizeChatBtn">−</button>
+        <button class="chatbot-close" id="closeChatBtn">✕</button>
       </div>
     </div>
     <div class="chatbot-messages" id="chatMessages">
@@ -1061,10 +1068,10 @@
     </div>
     <div class="chatbot-input">
       <input type="text" id="chatInput" placeholder="Type your message..." onkeypress="handleChatKeypress(event)">
-      <button onclick="sendMessage()">Send</button>
+      <button id="sendChatBtn">Send</button>
     </div>
   </div>
-  <button class="chatbot-toggle" onclick="toggleChatbot()">💬</button>
+  <button class="chatbot-toggle" id="toggleChatBtn">💬</button>
 </div>
 
 <div id="certModal" class="modal">
@@ -1229,67 +1236,78 @@ function showPage(pageId) {
 
 document.querySelectorAll('.nav-btn').forEach(btn => btn.addEventListener('click', () => showPage(btn.dataset.page)));
 
-function toggleChatbot() {
-  var chatWindow = document.getElementById('chatbotWindow');
-  if (chatWindow) {
-    if (chatWindow.classList.contains('active')) {
-      chatWindow.classList.remove('active');
-      setTimeout(() => { chatWindow.style.display = 'none'; }, 300);
-    } else {
-      chatWindow.style.display = 'flex';
-      setTimeout(() => { chatWindow.classList.add('active'); }, 10);
-      setTimeout(() => document.getElementById('chatInput').focus(), 100);
-    }
-  }
+// ==========================================
+// CHATBOT - FULLY FIXED
+// ==========================================
+const chatWindow = document.getElementById('chatbotWindow');
+const toggleBtn = document.getElementById('toggleChatBtn');
+const minimizeBtn = document.getElementById('minimizeChatBtn');
+const closeBtn = document.getElementById('closeChatBtn');
+const sendBtn = document.getElementById('sendChatBtn');
+const chatInput = document.getElementById('chatInput');
+const chatMessages = document.getElementById('chatMessages');
+
+function openChat() {
+  chatWindow.style.display = 'flex';
+  setTimeout(() => chatWindow.classList.add('active'), 10);
+  chatInput.focus();
 }
 
-function minimizeChatbot() {
-  var chatWindow = document.getElementById('chatbotWindow');
-  if (chatWindow) {
-    chatWindow.classList.remove('active');
-    setTimeout(() => { chatWindow.style.display = 'none'; }, 300);
-  }
+function closeChat() {
+  chatWindow.classList.remove('active');
+  chatWindow.style.display = 'none';
 }
 
-function closeChatbot() {
-  var chatWindow = document.getElementById('chatbotWindow');
-  if (chatWindow) {
-    chatWindow.classList.remove('active');
-    chatWindow.style.display = 'none';
-  }
+function minimizeChat() {
+  chatWindow.classList.remove('active');
+  setTimeout(() => { chatWindow.style.display = 'none'; }, 300);
 }
+
+toggleBtn.addEventListener('click', openChat);
+minimizeBtn.addEventListener('click', minimizeChat);
+closeBtn.addEventListener('click', closeChat);
+sendBtn.addEventListener('click', sendMessage);
 
 function handleChatKeypress(event) { if (event.key === 'Enter') sendMessage(); }
 
 async function sendMessage() {
-  var input = document.getElementById('chatInput');
-  var message = input.value.trim();
+  var message = chatInput.value.trim();
   if (!message) return;
-  var container = document.getElementById('chatMessages');
+  
+  // Display user message
   var userDiv = document.createElement('div');
   userDiv.className = 'chat-message user';
   userDiv.textContent = message;
-  container.appendChild(userDiv);
-  input.value = '';
-  container.scrollTop = container.scrollHeight;
+  chatMessages.appendChild(userDiv);
+  chatInput.value = '';
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+  
+  // Show loading
   var loadingDiv = document.createElement('div');
   loadingDiv.className = 'chat-message bot';
   loadingDiv.textContent = 'Typing...';
   loadingDiv.id = 'loadingMsg';
-  container.appendChild(loadingDiv);
-  container.scrollTop = container.scrollHeight;
+  chatMessages.appendChild(loadingDiv);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+  
   try {
     const headers = { 'Content-Type': 'application/json' };
-    if (CHAT_API_KEY && CHAT_API_KEY !== 'my-super-secret-chat-key-123') headers['Authorization'] = `Bearer ${CHAT_API_KEY}`;
+    if (CHAT_API_KEY && CHAT_API_KEY !== 'my-super-secret-chat-key-123') {
+      headers['Authorization'] = `Bearer ${CHAT_API_KEY}`;
+    }
     const response = await fetch(`${API_BASE}/api/v1/chat`, {
-      method: 'POST', headers: headers, body: JSON.stringify({ message: message, history: chatHistory })
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({ message: message, history: chatHistory })
     });
     const data = await response.json();
     document.getElementById('loadingMsg').remove();
+    
     var botDiv = document.createElement('div');
     botDiv.className = 'chat-message bot';
     botDiv.textContent = data.reply || "Sorry, I couldn't process that.";
-    container.appendChild(botDiv);
+    chatMessages.appendChild(botDiv);
+    
     chatHistory.push({ role: "user", content: message });
     chatHistory.push({ role: "assistant", content: data.reply });
     if (chatHistory.length > 6) chatHistory = chatHistory.slice(-6);
@@ -1298,10 +1316,10 @@ async function sendMessage() {
     var errorDiv = document.createElement('div');
     errorDiv.className = 'chat-message bot';
     errorDiv.textContent = "Connection error. Please check your internet.";
-    container.appendChild(errorDiv);
+    chatMessages.appendChild(errorDiv);
     console.error('Chat error:', error);
   }
-  container.scrollTop = container.scrollHeight;
+  chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
 function openCertModal(title, subtitle, desc) {  
@@ -1419,6 +1437,9 @@ document.addEventListener('DOMContentLoaded', async function() {
   initMap();
   fetchWeather();
   requestLocation();
+  
+  // Close chat on page load (make sure it's hidden)
+  closeChat();
 });
 
 window.addEventListener('click', e => { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; });
